@@ -1,0 +1,16 @@
+$primaryColor: #0c2575;
+$secondaryColor: #C6C9D3;
+$playerHeight: 70px;
+$sidebarWidth: 260px;
+$danger: #DC3545;
+$activeColor: #FF233A;
+
+@mixin transition ($prop) {
+    transition: #{$prop} .15s linear;
+}
+
+@mixin textEllipsis {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}

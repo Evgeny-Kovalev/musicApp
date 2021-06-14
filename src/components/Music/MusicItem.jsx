@@ -1,37 +1,61 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { formatSecondsAsTime } from './../../helpers';
 
+const MusicItem = ({song, likedMusic, play, pause, playerState, likeSongToggle,
+     setModalActive, removeSongFromPlaylist, canRemove, likeSong, unlikeSong}) => {
 
-const MusicItem = ({id, title, artist, img, playSong, isPlaying, activeTrack}) => {
+    const {id, title, artist, img} = song
 
-    const [duration, setDuration] = useState(0)
-
-    useEffect(() => {
-        const audio = new Audio(`http://localhost:3000/music/${id}.mp3`)
-        audio.duration || (audio.onloadedmetadata = () => setDuration(audio.duration))
-    })
+    const likeSongHandle = () => {
+        if (likedMusic && likedMusic[song.id]) {
+            // console.log("UNLIKE 1")
+            unlikeSong(song)
+        } 
+        else {
+            // console.log("LIKE 1")
+            likeSong(song)
+            // unlikeSongToggle(song)
+        }
+    }
 
     return (
         <li className="music__item song">
-            <NavLink to={"song/"+id} className="song__link">
+            <NavLink to={"/song/"+id} className="song__link">
                 <img src={img} alt="" className="song__img"/>
+                {
+                    playerState.currentSongId === id && playerState.playing &&
+                    <img src="/img/eq.svg" alt="" className="song__img_animation"/>
+                }
             </NavLink>
-            <button className="song__play" onClick={() => playSong(id)} >
+            <button className="song__play" onClick={playerState.currentSongId === id && playerState.playing ? pause : () => play(song)}>
             {
-                activeTrack === id && isPlaying
+                playerState.currentSongId === id && playerState.playing
                 ? <i className="fas fa-pause"></i>
                 : <i className="fas fa-play"></i>
             }
             </button>
             <div className="song__name">
-                <NavLink to={"song/" + id} className="song__link">
-                    {title}
-                </NavLink>
+                <NavLink to={"/song/" + id} className="song__link">{title}</NavLink>
             </div>
             <div className="song__artist">{artist}</div>
-            <div className="song__duration">{formatSecondsAsTime(duration)}</div>
-            <button className="song__like"><i className="fas fa-heart"></i></button>
+            {
+                canRemove 
+                ? 
+                <div className="song__playlist" onClick={() => removeSongFromPlaylist(song)}>
+                    <i className="fas fa-times"></i>
+                </div>
+                :  
+                <div className="song__playlist" onClick={() => setModalActive(true, song)}>
+                    <i className="fas fa-folder-plus"></i>
+                </div>
+            }
+            {/* <div className="song__duration"></div> */}
+            <button 
+                className={`song__like ${likedMusic && likedMusic[song.id] ? 'song__like--active' : ''}`} 
+                onClick={likeSongHandle}
+            >
+                <i className="fas fa-heart"></i>
+            </button>
         </li>
     )
 }

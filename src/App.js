@@ -1,67 +1,108 @@
-import './App.scss';
-import Header from './components/Header';
-import Sidebar from './components/Sidebar';
-import Player from './components/Player';
-import Playlists from './components/Playlists/Playlists';
-import Title from './components/Title';
-import Music from './components/Music/Music';
+import React, { createContext, useEffect, useRef } from 'react'
+import { connect } from 'react-redux';
 import { Route, Switch } from 'react-router';
-import MusicCard from './components/MusicCard/MusicCard';
-import initialState from './initialState'
+import Sidebar from './components/Sidebar/Sidebar';
+import AuthForm from './components/AuthForm';
+import SongPage from './components/Pages/SongPage';
+import './App.scss';
+import MainPage from './components/Pages/MainPage';
+import LikedMusicPage from './components/Pages/LikedMusicPage';
+import { setCurrentTime, setDuration, setVolume } from './redux/MusicPlayerReducer';
+import Playbar from './components/Playbar/Playbar';
+import MyPlaylistsPage from './components/Pages/MyPlaylistsPage';
+import PlaylistPage from './components/Pages/PlaylistPage';
+import PopularPage from './components/Pages/PopularPage';
+import SearchPage from './components/Pages/SearchPage';
+import Header from './components/Header/Header';
 
-import React, { useState } from 'react'
-import usePlayer from './hooks/usePlayer';
+export const StoreContext = createContext(null)
+
+function App({state, setDuration, setCurrentTime}) {
+
+	const audioRef = useRef()
+
+	useEffect(() => {
+		async function asyncFun()  {
+			if (state.playing) {
+				// await audioRef.current.load()
+				await audioRef.current.play()
+			}
+			else 
+				await audioRef.current.pause()
+		}
+		asyncFun()
+	}, [state.playing, state.currentSongId])
+
+	useEffect(() => {
+		audioRef.current.volume = state.volume
+	}, [state.volume])
 
 
-function App() {
-
-	const [state, setState] = useState(initialState)
-
-	const player = usePlayer(state.music)
-
-	const setSidebarState = (val) => {
-		setState(prevState => ({
-			...prevState,
-			sidebar: {...prevState.sidebar, open: val}
-		}))
-	}
 
 	return (
-		<div className="App">
-			<Sidebar isOpen={state.sidebar.open} setSidebarState={setSidebarState} />
-			<div className="wrapper">
-				<Header setSidebarState={setSidebarState} />
-				<div className="content">
-					<Switch>
-						<Route path="/song/:songId">
-							<MusicCard 
-								content={state.music}
-								/>
-						</Route>
-						<Route path="/playlist/:playlistId">
-							<MusicCard
-								isPlaylist={true}
-								content={state.playlists}
-							/>
-						</Route>
-						<Route path="/">
-							<Title type="full" title="My Last Playlists" subtitle="View All" subTitleLink="playlists/"/>
-							<Playlists playlists={state.playlists} />
-							<Music 
-								music={state.music} 
-								playSong={player.playSong} 
-								isPlaying={player.isPlaying}
-								activeTrack={player.activeTrack}
-							/>
-						</Route>
-					</Switch>
+		<>
+			<div className="App">
+				<Sidebar  />
+				<div className={`wrapper${state.currentSong ? " wrapper--player" : ""}`}>
+					<Header />
+					<div className="content">
+						<Switch>
+							<Route path="/search/:value" >
+								<SearchPage />
+							</Route>
+							<Route path="/popular" >
+								<PopularPage />
+							</Route>
+							<Route path="/song/:songId">
+								<SongPage />
+							</Route>
+							<Route path="/playlists">
+								<MyPlaylistsPage />
+							</Route>
+							<Route path="/playlist/:playlistId">
+								<PlaylistPage />
+							</Route>
+							<Route path="/liked">
+								<LikedMusicPage />
+							</Route>
+							<Route path="/auth">
+								<AuthForm />	
+							</Route>
+							<Route path="/">
+								<MainPage />
+							</Route>
+						</Switch>
+					</div>
+					<footer>
+						{state.currentSong && <Playbar audioRef={audioRef} />}
+					</footer>
 				</div>
-				<footer>
-					<Player player={player} />
-				</footer>
 			</div>
-		</div>
+			<audio
+				loop
+				ref={audioRef}
+				src={
+					state.currentSongId
+					? `http://localhost:3001/files/music/${state.currentSongId}.mp3`
+					: ''
+				}
+				onLoadedMetadata={() => setDuration(audioRef.current.duration)}
+				onTimeUpdate={e => setCurrentTime(e.target.currentTime)}
+			/>
+		</>
 	)
 }
 
-export default App;
+const mapStateToProps = state => ({
+	// music: state.music.myMusic,
+	state: state.player
+})
+
+const mapDispatchToProps = dispatch => ({
+	setDuration: duration => dispatch(setDuration(duration)),
+	setCurrentTime: time => dispatch(setCurrentTime(time)),
+	setVolume: volume => dispatch(setVolume(volume))
+})
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(App)

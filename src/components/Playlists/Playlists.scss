@@ -1,0 +1,184 @@
+@import "../../css/vars.scss";
+
+$playlistBorderRadius: 10px;
+
+.playlists {
+
+    &__item {
+        padding: 0 15px;
+        margin-bottom: 30px;
+        flex: 0 0 20%;
+        max-width: 20%;
+        @include transition(transform);
+
+        &:hover {
+            transform: translateY(-2%);
+            .playlists__actions {
+                opacity: 1;
+            }
+        }
+
+        &--add {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+
+    &__link {
+        &:hover {
+            color: #4F6EE1;
+            text-decoration: none;
+        }
+    }
+
+    &__inner {
+        margin-bottom: 15px;
+        box-shadow: 0 15px 10px rgba(#000, .15);
+        position: relative;
+        border-radius: $playlistBorderRadius;
+        
+    }
+
+    &__img {
+        border-radius: $playlistBorderRadius;
+        width: 100%;
+    }
+
+    &__actions {
+        background-color: rgba(#000, .4);
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        color: #fff;
+        padding-bottom: 15px;
+        border-radius: $playlistBorderRadius;
+        @include transition(opacity);
+        opacity: 0; 
+    }
+
+    &__add {
+        width: 80px;
+        height: 80px;
+        position: relative;
+        background-color: #fff;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 8px 15px rgba(#000, .15);
+
+        &:hover:after, &:hover:before {
+            background-color: $primaryColor;
+        }
+
+        &::before, &::after {
+            content: "";
+            width: 45%;
+            height: 10px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            background-color: #C6C9D3;
+            border-radius: 5px;
+            @include transition(background-color);
+        }
+        &::before {
+            transform: translate(-50%, -50%);
+        }
+
+        &::after {
+            transform: translate(-50%, -50%) rotate(90deg);
+        }
+    }
+
+    &__title {
+        color: $primaryColor;
+        font-weight: 500;
+        @include transition(color);
+
+        &:hover {
+            color: #4F6EE1;
+        }
+    } 
+
+}
+
+.actions {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+
+    i {
+        margin-right: 5px;
+    }
+}
+
+
+// Large devices (desktops, less than 1200px)
+@media (max-width: 1199.98px) {
+
+}
+
+// Medium devices (tablets, less than 992px)
+@media (max-width: 991.98px) {
+    
+    .playlists {
+        &__actions {
+            padding-bottom: 10px;
+        }
+
+        &__list {
+            flex-wrap: unset;
+        }
+
+        &__item {
+            flex: 0 0 25%;
+            max-width: 25%;
+        }
+    }
+    
+    .actions {
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center
+    }
+}
+// Small devices (landscape phones, less than 768px)
+@media (max-width: 767.98px) {
+    .playlists {
+        &__actions {
+            padding-bottom: 0px;
+        }
+    }
+}
+// Extra small devices (portrait phones, less than 576px)
+@media (max-width: 575.98px) {
+    .actions {
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: flex-end;
+    }
+    .playlists {
+        &__actions {
+            padding-bottom: 10px;
+        }
+
+        &__list {
+            flex-wrap: wrap;
+        }
+
+        &__item {
+            flex: 0 0 50%;
+            max-width: 50%;
+            
+            &:last-child {
+                display: none;
+            }
+        }
+    }
+}
+@media (max-width: 400px) {
+    
+    }

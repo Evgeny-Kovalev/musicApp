@@ -1,0 +1,29 @@
+@import "../../css/vars.scss";
+
+.title {
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    color: $secondaryColor;
+    font-weight: normal;
+    margin-bottom: 15px;
+}
+
+.full_title {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    
+    .title {
+        margin-bottom: 0;
+    }
+    .subtitle {
+        @include transition(color);
+        margin-bottom: 0;
+        &:hover {
+            color: $primaryColor;
+        }
+    }
+}

@@ -1,0 +1,102 @@
+@import "../../css/vars.scss";
+
+.search {
+
+    width: 100%;
+    position: relative;
+
+    &__form {
+
+    }
+
+    &__list {
+        position: absolute;
+        left: 0;
+        top: 65px;
+        width: 80%;
+        background-color: red;
+        padding: 15px;
+        border-radius: 3px;
+        display: none;
+        z-index: 2;
+
+        &--active {
+            display: block;
+        }
+    }
+
+    &__inner {
+        position: relative;
+    }
+
+    &__input {
+        min-width: 50%;
+        padding: 10px 40px 10px 50px;
+        
+        border: 1px solid $secondaryColor;
+        border-radius: 25px;
+        background-color: inherit;
+        font-size: 17px;
+        color: $secondaryColor;
+        @include textEllipsis;
+
+        &::placeholder {
+            color: $secondaryColor;
+        }
+    }
+
+    &__btn {
+        position: absolute;
+        padding: 0;
+        left: 25px;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+    }
+
+    &__icon {
+        font-size: 17px;
+        color: #CBD1E0;
+    }
+
+    &--mobile {
+        display: none;
+        margin-bottom: 15px;
+    }
+}
+
+@media (max-width: 400px) {
+
+}
+// Extra small devices (portrait phones, less than 576px)
+@media (max-width: 575.98px) {
+
+}
+
+// Small devices (landscape phones, less than 768px)
+@media (max-width: 767.98px) {
+    .search {
+        display: none;
+
+        &--mobile {
+            display: block;
+            margin-bottom: 30px;
+
+            .search__input {
+                width: 100%;
+            }
+        }
+    }
+}
+
+// Medium devices (tablets, less than 992px)
+@media (max-width: 991.98px) {
+
+}
+
+// Large devices (desktops, less than 1200px)
+@media (max-width: 1199.98px) {
+
+}

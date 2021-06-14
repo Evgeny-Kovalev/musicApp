@@ -1,4 +1,5 @@
 import React from 'react'
+import './buttons.scss';
 
 const CircleBtn = ({type, isActive = false, className, onClick}) => {
     const types = [

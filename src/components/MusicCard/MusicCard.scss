@@ -1,0 +1,102 @@
+@import "../../css/vars.scss";
+
+.song_card {
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 2px 5px 10px rgba(#000, .05);
+    border-radius: 3px;
+    margin-bottom: 15px;
+
+    &__inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+
+        max-width: 66.666%;
+        flex: 0 0 66.666%;
+        padding: 0 15px;
+    }
+
+    &__wrapper {
+        max-width: 33.333%;
+        flex: 0 0 33.333%;
+        padding: 0 15px;
+    }
+    
+    &__title {
+        font-size: 30px;
+        margin-bottom: 5px;
+    }
+
+    &__details {
+        color: darken($secondaryColor, 30);
+        
+        &_item {
+            margin-bottom: 10px;
+            
+            &--last {
+                margin-bottom: 15px;
+            }
+        }
+    }
+
+    &__right {
+        display: flex;
+        justify-content: space-between;
+
+        &_inner {
+            display: flex;
+            align-items: center;
+        }
+    }
+
+    &__circle_item {
+
+    }
+}
+
+@media (max-width: 400px) {
+
+}
+// Extra small devices (portrait phones, less than 576px)
+@media (max-width: 575.98px) {
+    .song_card {
+        &__wrapper {
+            flex: 0 0 100%;
+            max-width: 100%;
+            margin-bottom: 15px;
+        }
+
+        &__inner {
+            flex: 0 0 100%;
+            max-width: 100%;
+            flex-wrap: wrap;
+        }
+
+        &__right {
+            &_inner {
+                flex-wrap: wrap;
+                margin-bottom: -15px;
+            }
+        }
+
+        &__circle_item {
+            margin-bottom: 15px;
+        }
+    }
+}
+
+// Small devices (landscape phones, less than 768px)
+@media (max-width: 767.98px) {
+    
+}
+
+// Medium devices (tablets, less than 992px)
+@media (max-width: 991.98px) {
+
+}
+
+// Large devices (desktops, less than 1200px)
+@media (max-width: 1199.98px) {
+
+}

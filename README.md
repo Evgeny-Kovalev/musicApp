@@ -5,11 +5,11 @@ Clone down this repository. You will need `node` and `npm` installed on your mac
 
 Installation:
 
-`npm install`  
+`npm run install-all`  
 
-To Start Server:
+To Start App:
 
-`npm start`  
+`npm run dev`  
 
 To Visit App:
 

@@ -1,0 +1,170 @@
+@import "../../css/vars.scss";
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    width: $sidebarWidth;
+    max-height: 100vh;
+    height: 100%;
+    padding: 30px 20px;
+    overflow-y: scroll;
+
+    background-color: #fff;
+    border-right: 2px solid #FBFBFD;
+    z-index: 10;
+    @include transition(transform);
+
+    &__close {
+        display: none;
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        cursor: pointer;
+    }
+
+    &--active {
+        transform: translateX(0) !important;
+    }
+
+    &__nav {
+
+    }
+}
+
+.sidebar_nav {
+
+    &__list {
+
+    }
+
+    &__item {
+        font-weight: 500;
+
+        &:not(:last-child) {
+            margin-bottom: 25px;
+        }
+
+        &_icon {
+            margin-right: 15px;
+            color: $secondaryColor;
+            text-align: center;
+            width: 15px;
+            height: 15px;
+        }
+
+        &_text {
+
+        }
+    }
+    
+    &__link {
+        display: flex;
+        color: $primaryColor;
+        @include transition(color);
+        
+        &--active {
+            color: #4F6EE1;
+        }
+    
+        &--active &_icon {
+            color: #4F6EE1;
+        }
+
+        &:hover {
+            color: #4F6EE1;
+        }
+    } 
+
+    &__title {
+        margin: 40px 0 25px;
+
+        color: $secondaryColor;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+}
+
+.profile {
+    text-align: center;
+    margin-bottom: 60px;
+
+    &__img {
+        width: 65px;
+        height: 65px;
+        margin-bottom: 10px;
+
+        border-radius: 50px;
+        box-shadow: 0 20px 20px rgba(#000, .05);
+    }
+    
+    &__name {
+        margin-bottom: 5px;
+        font-size: 15px;
+    }
+    
+    &__link {
+    }
+    
+    &__email {
+        font-size: 14px;
+        color: $secondaryColor;
+    }
+}
+
+.logo {
+
+    margin-bottom: 30px;
+
+    &__link {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        &:hover {
+            text-decoration: none;
+        }
+    }
+    
+    &__img {
+        width: 65px;
+        height: 65px;
+    }
+
+    &__title {
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 400px) {
+
+}
+// Extra small devices (portrait phones, less than 576px)
+@media (max-width: 575.98px) {
+
+}
+
+// Small devices (landscape phones, less than 768px)
+@media (max-width: 767.98px) {
+
+    .sidebar {
+        transform: translateX(-100%);
+        z-index: 40;
+
+        &__close {
+            display: inline;
+        }
+    }
+
+    .profile {
+        margin-bottom: 30px;
+    }
+}
+
+// Medium devices (tablets, less than 992px)
+@media (max-width: 991.98px) {
+
+}
+
+// Large devices (desktops, less than 1200px)
+@media (max-width: 1199.98px) {
+
+}
