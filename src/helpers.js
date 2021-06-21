@@ -24,3 +24,19 @@ export function numFormatter(num) {
         return num;
     }
 }
+// const url = urlFromObj({
+//     url: 'http://localhost:3001/api/music',
+//     search: songName,
+//     limit: 3,
+//     orderBy: "likes"
+// }))
+export function urlFromObj(obj) {
+    const str = [];
+    for (let p in obj) {
+        if (obj.hasOwnProperty(p) && p !== 'url') {
+            str.push(p + "=" + obj[p]);
+        }
+    }
+        
+  return obj.url + '?' + str.join("&");
+}

@@ -1,31 +1,27 @@
 import React, { useEffect } from 'react'
 import { Alert, Spinner } from 'react-bootstrap'
 import { connect } from 'react-redux'
+import { compose } from 'redux'
 import { initLikedMusic } from '../../redux/MusicReducer'
+import withAuthRedirect from '../hoc/withAuthRedirect'
 import Music from '../Music/Music'
 import Title from '../Title/Title'
 
-const LikedMusicPage = ({likedMusic, initLikedMusic, musicError}) => {
+const LikedMusicPage = ({likedMusic, initLikedMusic, musicError, user}) => {
 
     useEffect(() => {
-        initLikedMusic()
+        user?.id && initLikedMusic(user.id)
     }, [initLikedMusic])
 
     let myLikedMusic = musicError ? <Alert variant="danger" >Music can't be loaded!</Alert>
         : <Spinner animation="border" role="status"></Spinner>
     
-    //convert obj to array
-    const likedMusicConvert = []
-    if (likedMusic) {
-        for (let song of Object.values(likedMusic)) {
-            likedMusicConvert.push(song)
-        }
-        myLikedMusic = <Music music={likedMusicConvert} />
-    }
+    if (likedMusic) myLikedMusic = <Music music={likedMusic} />
+    
 
     return (
         <>
-            <Title type="subtitle" subtitle={likedMusicConvert.length + " Songs"} >
+            <Title type="subtitle" subtitle={`${likedMusic?.length || "0"} Songs`} >
                 Liked music
             </Title>
             { myLikedMusic }
@@ -35,11 +31,15 @@ const LikedMusicPage = ({likedMusic, initLikedMusic, musicError}) => {
 
 const mapStateToProps = state => ({
     likedMusic: state.music.liked.list,
-    musicError: state.music.my.error
+    musicError: state.music.my.error,
+    user: state.auth.user,
 })
 
 const mapDispatchToProps = dispatch => ({
-    initLikedMusic: () => dispatch(initLikedMusic())
+    initLikedMusic: (userId) => dispatch(initLikedMusic(userId))
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(LikedMusicPage)
+export default compose(
+    connect(mapStateToProps, mapDispatchToProps),
+    withAuthRedirect
+)(LikedMusicPage)

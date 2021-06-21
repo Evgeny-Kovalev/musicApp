@@ -1,44 +1,61 @@
 import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
 import { useParams } from 'react-router'
-import { useHistory } from 'react-router-dom'
-import { deletePlaylist, initMyPlaylists, initPlaylist, removeSongFromPlaylistStart, setCurrentPlaylist } from '../../redux/PlaylistsReducer'
+import { addToMyPlaylists, removeFromMyPlaylists, initMyPlaylists, initPlaylist, removeSongFromPlaylistStart, setCurrentPlaylist } from '../../redux/PlaylistsReducer'
 import Music from '../Music/Music'
 import MusicCard from '../MusicCard/MusicCard'
 
-const PlaylistPage = ({myPlaylists, removeSongFromPlaylist, initPlaylist, currentPlaylist, deletePlaylist, initMyPlaylists}) => {
+const PlaylistPage = (props) => {
+
+    const {
+        myPlaylists, removeSongFromPlaylist, initPlaylist,
+        currentPlaylist, removeFromMyPlaylists, addToMyPlaylists,
+        initMyPlaylists, user
+    } = props
 
     const {playlistId} = useParams()
-    const history = useHistory()
 
     useEffect(() => {
-        initMyPlaylists()
-        initPlaylist(playlistId)
-    }, [])
+        if (user?.id) {
+            initMyPlaylists(user.id)
+        }
+        if (playlistId) {
+            initPlaylist(playlistId)
+        }
+    }, [initPlaylist, playlistId])
 
     const removeSongHandle = (song) => {
-        removeSongFromPlaylist(currentPlaylist.id, song)
+        removeSongFromPlaylist(currentPlaylist._id, song)
     }
 
-    const deletePlaylistHandle = (playlistsId) => {
-        // if (myPlaylists.some(list => list.id.toString() === playlistId.toString()))
-        deletePlaylist(playlistsId)
-        history.goBack()
+    const deletePlaylistHandle = (playlist) => {
+        if (user?.id) {
+            removeFromMyPlaylists(user.id, playlist)
+        }
     }
+    const addToMyPlaylistsHandle = (playlist) => {
+        if (user?.id) {
+            addToMyPlaylists(user.id, playlist)
+        }
+    }
+
+    const isMyPlaylist = myPlaylists && myPlaylists.some(myPlaylist => myPlaylist && myPlaylist._id.toString() === playlistId.toString())
 
     return (
         <>
             <MusicCard
                 id={playlistId}
                 content={currentPlaylist}
-                deletePlaylist={deletePlaylistHandle}
+                addToMyPlaylists={addToMyPlaylistsHandle}
+                deleteFromMyPlaylists={deletePlaylistHandle}
                 isPlaylist
+                isMy={isMyPlaylist}
             />
             {
                 currentPlaylist && currentPlaylist.music && 
                 <Music 
                     music={currentPlaylist.music} 
-                    canRemove={currentPlaylist.custom}
+                    canRemove={currentPlaylist.custom && isMyPlaylist}
                     removeSongFromPlaylist={currentPlaylist.custom && removeSongHandle}
                     playlist={currentPlaylist}
                 />
@@ -48,15 +65,18 @@ const PlaylistPage = ({myPlaylists, removeSongFromPlaylist, initPlaylist, curren
 }
 
 const mapStateToProps = state => ({
-    // myPlaylists: state.playlists.my.list,
     currentPlaylist: state.playlists.currentPlaylist,
+    myPlaylists: state.playlists.my.list,
+    user: state.auth.user,
 })
 
 const mapDispatchToProps = dispatch => ({
     removeSongFromPlaylist: (playlist, song) => dispatch(removeSongFromPlaylistStart(playlist, song)),
     initPlaylist: playlistId => dispatch(initPlaylist(playlistId)),
     initMyPlaylists: () => dispatch(initMyPlaylists()),
-    deletePlaylist: playlistId => dispatch(deletePlaylist(playlistId)),
+    initMyPlaylists: (userId) => dispatch(initMyPlaylists(userId)),
+    removeFromMyPlaylists: (userId, playlistId) => dispatch(removeFromMyPlaylists(userId, playlistId)),
+    addToMyPlaylists: (userId, playlist) => dispatch(addToMyPlaylists(userId, playlist)),
     setCurrentPlaylist: playlistId => dispatch(setCurrentPlaylist(playlistId)),
     
 })

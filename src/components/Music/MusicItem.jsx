@@ -1,22 +1,12 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
 
-const MusicItem = ({song, likedMusic, play, pause, playerState, likeSongToggle,
-     setModalActive, removeSongFromPlaylist, canRemove, likeSong, unlikeSong}) => {
+const MusicItem = ({ song, likedMusic, play, pause, playerState,
+     setModalActive, removeSongFromPlaylist, canRemove, likeSongToggle, isAuth }) => {
 
-    const {id, title, artist, img} = song
+    const {_id : id, title, artist, img} = song
 
-    const likeSongHandle = () => {
-        if (likedMusic && likedMusic[song.id]) {
-            // console.log("UNLIKE 1")
-            unlikeSong(song)
-        } 
-        else {
-            // console.log("LIKE 1")
-            likeSong(song)
-            // unlikeSongToggle(song)
-        }
-    }
+    const isLikedSong = likedMusic && likedMusic.find(likedSong => likedSong._id === song._id)
 
     return (
         <li className="music__item song">
@@ -39,23 +29,26 @@ const MusicItem = ({song, likedMusic, play, pause, playerState, likeSongToggle,
             </div>
             <div className="song__artist">{artist}</div>
             {
-                canRemove 
-                ? 
+                canRemove
+                ? isAuth &&
                 <div className="song__playlist" onClick={() => removeSongFromPlaylist(song)}>
                     <i className="fas fa-times"></i>
                 </div>
-                :  
+                :  isAuth &&
                 <div className="song__playlist" onClick={() => setModalActive(true, song)}>
                     <i className="fas fa-folder-plus"></i>
                 </div>
             }
             {/* <div className="song__duration"></div> */}
-            <button 
-                className={`song__like ${likedMusic && likedMusic[song.id] ? 'song__like--active' : ''}`} 
-                onClick={likeSongHandle}
-            >
-                <i className="fas fa-heart"></i>
-            </button>
+            {
+                isAuth &&
+                <button 
+                    className={`song__like ${isLikedSong ? 'song__like--active' : ''}`} 
+                    onClick={() => likeSongToggle(!isLikedSong, song)}
+                >
+                    <i className="fas fa-heart"></i>
+                </button>
+            }
         </li>
     )
 }

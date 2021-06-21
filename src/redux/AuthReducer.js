@@ -1,13 +1,17 @@
+import { authAPI } from "../components/api/api"
+
 const 
     AUTH_START = 'AUTH_START',
     AUTH_SUCCESS = 'AUTH_SUCCESS',
-    AUTH_FAIL = 'AUTH_FAIL'
+    AUTH_FAILED = 'AUTH_FAILED',
+    AUTH_LOGOUT = 'AUTH_LOGOUT'
 
 const initialState = {
-    userId: null,
-    email: null,
-    login: null,
+    user: null,
+    token: null,
     isAuth: false,
+    error: false,
+    loading: false,
 }
 
 const AuthReducer = (state = initialState, action) => {
@@ -16,16 +20,41 @@ const AuthReducer = (state = initialState, action) => {
         case AUTH_START:
             return {
                 ...state,
+                loading: true,
+                error: false,
+                isAuth: false,
             }
 
         case AUTH_SUCCESS:
+            console.log(action)
             return {
                 ...state,
+                user: {
+                    ...state.user,
+                    id: action.data.user.id,
+                    email: action.data.user.email,
+                    name: action.data.user.name,
+                },
+                token: action.data.token,
+                isAuth: true,
+                loading: false,
+                error: false,
             }
 
-        case AUTH_FAIL:
+        case AUTH_FAILED:
             return {
                 ...state,
+                loading: false,
+                error: action.error || "Error",
+                isAuth: false,
+            }
+
+        case AUTH_LOGOUT:
+            return {
+                ...state,
+                user: null,
+                token: null,
+                isAuth: false,
             }
 
         default:
@@ -33,41 +62,53 @@ const AuthReducer = (state = initialState, action) => {
     }
 }
 
-// export const setAuthUserData = (userId, email, login, isAuth) => ({
-//     type: SET_USER_DATA,
-//     data: {userId, email, login, isAuth}
-// })
-
-
 export const authStart = () => ({ type: AUTH_START })
-export const authSuccess = (data) => ({ type: AUTH_START,data })
-export const authFail = (error) => ({ type: AUTH_FAIL, error})
-
-
-export const auth = (email, password) => dispatch => {
-    dispatch(authStart())
-    const key = "AIzaSyAHDO9BBoKOhKmjwt10H3svpcel2qE96rQ"
-    const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=${key}`
-    const body =  {
-        email, password, returnSecureToken: true
-    }
-    fetch(url, {
-        method: 'POST',
-        body: JSON.stringify(body),
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        console.log(data)
-        // dispatch(authSuccess(data))
-    })
-    .catch(err => {
-        console.log(err)
-        // dispatch(authFail(err))
-    })
+export const authSuccess = (data) => ({ type: AUTH_SUCCESS, data })
+export const authFailed = (error) => ({ type: AUTH_FAILED, error})
+export const logout = () => {
+    localStorage.removeItem('user')
+    localStorage.removeItem('token')
+    return { type: AUTH_LOGOUT }
 }
 
+export const login = (email, password) => async dispatch => {
+    dispatch(authStart())
+
+    try {
+        const [res, data] = await authAPI.login(email, password)
+        if (res.status !== 200) throw Error(data.message)
+
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+
+        dispatch(authSuccess(data))
+    }
+    catch(err) {
+        dispatch(authFailed(err))
+        console.log(err)
+    }
+}
+
+export const signup = (email, password, name) => async dispatch => {
+    dispatch(authStart())
+
+    try {
+        const [res, data] = await authAPI.signup(email, password, name)
+        if (res.status !== 200) throw Error(data.message)
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+        dispatch(authSuccess(data))
+    }
+    catch(err) {
+        dispatch(authFailed(err))
+        console.log(err)
+    }
+}
+
+export const getAuthUserData = () => dispatch => {
+    const token = localStorage.getItem('token')
+    const user = localStorage.getItem('user')
+    if (token && user) dispatch(authSuccess({ user: JSON.parse(user), token }))
+}
 
 export default AuthReducer

@@ -1,28 +1,22 @@
 import React from 'react'
-import { useEffect } from 'react'
-import { connect } from 'react-redux'
-import { useHistory, useParams } from 'react-router-dom'
-import { searchMusic, setSearchValue } from '../../redux/MusicReducer'
+import { useState } from 'react'
+import { useHistory } from 'react-router-dom'
 import './Search.scss'
 
-const Search = ({isMobile, searchMusic, setSearchValue, searchValue}) => {
+const Search = ({isMobile}) => {
 
     const history = useHistory()
-    const {value} = useParams()
+    const [searchValue, setSearchValue] = useState("")
 
-    useEffect(() => {
-        value && setSearchValue(value)
-    }, [setSearchValue, value])
-
-    const searchChangeHandle = (e) => {
+    const searchValueChangeHandle = (e) => {
         setSearchValue(e.target.value)
-        searchMusic()
         history.push(`/search/${e.target.value}`)
     }
     const formSubmitHandle = (e) => {
         e.preventDefault()
         history.push(`/search/${searchValue}`)
     }
+
     return (
         <div className={isMobile ? "search search--mobile" : "search"}>
             <form className="search__form" onSubmit={formSubmitHandle}>
@@ -31,7 +25,7 @@ const Search = ({isMobile, searchMusic, setSearchValue, searchValue}) => {
                         type="text"
                         className="search__input"
                         placeholder="Some song title..."
-                        onChange={searchChangeHandle}
+                        onChange={searchValueChangeHandle}
                         value={searchValue || ""}
                     />
                     <button className="search__btn"><i className="search__icon fas fa-search"></i></button>
@@ -44,13 +38,4 @@ const Search = ({isMobile, searchMusic, setSearchValue, searchValue}) => {
     )
 }
 
-const mapStateToProps = state => ({
-    searchValue: state.music.search.value,
-})
-
-const mapDispatchToProps = dispatch => ({
-    searchMusic: (songName) => dispatch(searchMusic(songName)),
-    setSearchValue: (songName) => dispatch(setSearchValue(songName))
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(Search)
+export default Search

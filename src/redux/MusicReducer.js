@@ -13,18 +13,18 @@ const
     
     UNLIKE_SONG = 'UNLIKE_SONGS',
     LIKE_SONG = 'LIKE_SONG',
-    ADD_SONG_TO_MY_MUSIC = 'ADD_SONG_TO_MY_MUSIC',
+    ADD_SONG_TO_MY_MUSIC_SUCCESS = 'ADD_SONG_TO_MY_MUSIC_SUCCESS',
     
     SET_CURRENT_SONG = 'SET_CURRENT_SONG',
     SET_SEARCH_VALUE = 'SET_SEARCH_VALUE',
-    SEARCH_MUSIC = 'SEARCH_MUSIC'
+    SET_SEARCH_MUSIC = 'SET_SEARCH_MUSIC',
+    REMOVE_FROM_MY_MUSIC_SUCCESS ='REMOVE_FROM_MY_MUSIC_SUCCESS'
 
 const initialState = {
     search: {
         list: null,
         error: false,
         loading: false,
-        value: null,
     },
     my: {
         list: null,
@@ -42,24 +42,6 @@ const initialState = {
         loading: false,
     },
     currentSong: null,
-    global: [
-        {
-            "id":"0",
-            "title":"song1",
-            "img":"http://localhost:3001/files/img/poster-1.jpg",
-            "artist":"artist-1",
-            "plays":100000,
-            "likes":50000
-          },
-          {
-            "id":"1",
-            "title":"song2",
-            "img":"http://localhost:3001/files/img/poster-2.jpg",
-            "artist":"artist-2",
-            "plays":100000,
-            "likes":52000
-          },
-    ]
 }
 
 const MusicReducer = (state = initialState, action) => {
@@ -153,45 +135,24 @@ const MusicReducer = (state = initialState, action) => {
             return { ...state, currentSong: action.song }
 
         case LIKE_SONG: {
-            const music = {
-                ...state,
-                liked: {
-                    ...state.liked,
-                    list: {...state.liked.list}
-                }
-            }
-            music.liked.list[action.song.id] = action.song
-            
-            return music
-        }
-        case UNLIKE_SONG: {
-            const music = {
-                ...state,
-                liked: {
-                    ...state.liked,
-                    list: {...state.liked.list}
-                }
-            }
-            delete music.liked.list[action.song.id]
-
-            return music
-        }
-        case ADD_SONG_TO_MY_MUSIC:
-            const newSong = {
-                id: Date.now(),
-                title: "song2",
-                img: "/img/poster-2.jpg",
-                artist: "artist-2",
-                plays: 0,
-                likes: 0
-            }
             return {
                 ...state,
-                my: {
-                    ...state.my,
-                    list: [newSong, ...state.my.list]
+                liked: {
+                    ...state.liked,
+                    list: [action.song, ...state.liked.list]
                 }
             }
+        }
+        case UNLIKE_SONG: {
+            return {
+                ...state,
+                liked: {
+                    ...state.liked,
+                    list: state.liked.list.filter(likedSong => likedSong._id !== action.song._id)
+                }
+            }
+        }
+
         case SET_SEARCH_VALUE:
             return {
                 ...state,
@@ -200,13 +161,31 @@ const MusicReducer = (state = initialState, action) => {
                     value: action.searchValue
                 }
             }
-        case SEARCH_MUSIC:
-            // FIX
+        case SET_SEARCH_MUSIC:
             return {
                 ...state,
                 search: {
                     ...state.search,
-                    list: state.global.filter(song => song.title.includes(state.search.value))
+                    list: action.music
+                }
+            }
+        case ADD_SONG_TO_MY_MUSIC_SUCCESS:
+            const newList = state.my.list.filter(song => song._id.toString() !== action.song._id)
+            newList.push(action.song)
+
+            return {
+                ...state,
+                my: {
+                    ...state.my,
+                    list: newList
+                }
+            }
+        case REMOVE_FROM_MY_MUSIC_SUCCESS:
+            return {
+                ...state,
+                my: {
+                    ...state.my,
+                    list: state.my.list.filter(song => song._id.toString() !== action.song._id)
                 }
             }
         default:
@@ -218,112 +197,147 @@ export const fetchMyMusicStart = () => ({type: FETCH_MY_MUSIC_START})
 export const fetchMyMusicSuccess = (music) => ({type: FETCH_MY_MUSIC_SUCCESS, music})
 export const fetchMyMusicFailed = () => ({type: FETCH_MY_MUSIC_FAILED})
 
-export const initMyMusic = () => dispatch => {
+export const initMyMusic = (userId) => async dispatch => {
     dispatch(fetchMyMusicStart())
-    fetch('http://localhost:3001/api/music')
-        .then(res => res.json())
-        .then(music => {
-            dispatch(fetchMyMusicSuccess(music))
-        })
-        .catch(err => {
-            dispatch(fetchMyMusicFailed())
-        })
+    try {
+        const res = await fetch(`http://localhost:3001/api/users/${userId}/music`)
+        const data = await res.json()
+        if (res.status !== 200) throw Error(data.message)
+        dispatch(fetchMyMusicSuccess(data))
+    }
+    catch(err) {
+        dispatch(fetchMyMusicFailed())
+        console.log(err)
+    }
 }
 
-export const initSong = (songId) => dispatch => {
-    // dispatch(fetchMyPlaylistsStart())
-    fetch(`http://localhost:3001/api/music/${songId}`)
-        .then(res => res.json())
-        .then(song => {
-            console.log("INIT SONG",song)
-            dispatch(setCurrentSong(song))
-        })
-        .catch(err => {
-            console.error(err);
-        })
+export const initSong = (songId) => async dispatch => {
+    try {
+        const res = await fetch(`http://localhost:3001/api/music/${songId}`)
+        const data = await res.json()
+        if (res.status !== 200) throw Error(data.message)
+        dispatch(setCurrentSong(data))
+    }
+    catch(err) {
+        console.log(err)
+    }
 }
 
 export const fetchLikedMusicStart = () => ({type: FETCH_LIKED_MUSIC_START})
 export const fetchLikedMusicSuccess = (music) => ({type: FETCH_LIKED_MUSIC_SUCCESS, music})
 export const fetchLikedMusicFailed = () => ({type: FETCH_LIKED_MUSIC_FAILED})
 
-export const initLikedMusic = () => dispatch => {
+export const initLikedMusic = (userId) => async dispatch => {
     dispatch(fetchLikedMusicStart())
-    fetch('https://music-app-c7a13-default-rtdb.europe-west1.firebasedatabase.app/liked.json')
-        .then(res => res.json())
-        .then(likedMusic => {
-            dispatch(fetchLikedMusicSuccess(likedMusic))
+    try {
+        const res = await fetch(`http://localhost:3001/api/users/${userId}/music/liked`)
+        const data = await res.json()
+        if (res.status !== 200) throw Error(data.message)
+        dispatch(fetchLikedMusicSuccess(data))
+    }
+    catch(err) {
+        fetchLikedMusicFailed()
+        console.log(err)
+    }
+}
+
+export const likeSong = (userId, song) => async dispatch => {
+    const url = `http://localhost:3001/api/music/${song._id}/like`
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify({ userId }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
         })
-        .catch(err => {
-            dispatch(fetchLikedMusicFailed())
-        })    
-}
-
-export const likeSong = (song) => dispatch => {
-    console.log("LIKE")
-    // const url = "https://music-app-c7a13-default-rtdb.europe-west1.firebasedatabase.app/liked.json"
-    
-    // try {
-        // const response = await fetch(url, {
-        //     method: 'POST',
-        //     body: JSON.stringify(song),
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     }
-        // })
-        // const json = await response.json()
-        // console.log('Success:', JSON.stringify(json))
+        const data = await res.json()
+        if (res.status !== 200) throw Error(data.message)
         dispatch({ type: LIKE_SONG, song })
-    // }
-    // catch (err) {
-    //     console.error('Error:', err)
-    // }
-
-    // console.log(getState().music.liked)
+    }
+    catch (err) {
+        console.error('Error:', err)
+    }
 }
-export const unlikeSong = (song) => dispatch => {
-    console.log("UNLIKE", song.id)
-
-    // const url = `https://music-app-c7a13-default-rtdb.europe-west1.firebasedatabase.app/liked/${song.id.toString()}.json`
-    
-    // try {
-    //     const response = await fetch(url, {
-    //         method: 'DELETE',
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         }
-    //     })
-    //     const json = await response.json()
-    //     console.log('Success:', JSON.stringify(json))
-        dispatch({ type: UNLIKE_SONG, song})
-    // }
-    // catch (err) {
-    //     console.error('Error:', err)
-    // }
-    // console.log(getState().music.liked)
+export const unlikeSong = (userId, song) => async dispatch => {
+    const url = `http://localhost:3001/api/music/${song._id}/like`
+    try {
+        const res = await fetch(url, {
+            method: 'DELETE',
+            body: JSON.stringify({ userId }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        const data = await res.json()
+        if (res.status !== 200) throw Error(data.message)
+        dispatch({ type: UNLIKE_SONG, song })
+    }
+    catch (err) {
+        console.error('Error:', err)
+    }
 }
 
 export const fetchPopularMusicStart = () => ({ type: FETCH_POPULAR_MUSIC_START })
 export const fetchPopularMusicFail = () => ({ type: FETCH_POPULAR_MUSIC_FAILED })
 export const fetchPopularMusicSuccess = (music) => ({ type: FETCH_POPULAR_MUSIC_SUCCESS, music })
 
-export const initPopularMusic = () => dispatch => {
+export const initPopularMusic = () => async dispatch => {
     dispatch(fetchPopularMusicStart())
-    fetch("https://music-app-c7a13-default-rtdb.europe-west1.firebasedatabase.app/popular/music.json")
-        .then(res => res.json())
-        .then(popularMusic => {
-            dispatch(fetchPopularMusicSuccess(popularMusic))
-        })
-        .catch(err => {
-            dispatch(fetchPopularMusicFail())
-        })
+    try {
+        const res = await fetch("http://localhost:3001/api/music/?orderBy=likes&order=-1")
+        const data = await res.json()
+        if (res.status !== 200) throw Error(data.message)
+        dispatch(fetchPopularMusicSuccess(data))
+    }
+    catch(err) {
+        dispatch(fetchPopularMusicFail())
+    }
 }
 export const setCurrentSong = (song) => ({type: SET_CURRENT_SONG, song})
-export const addSongToMyMusic = (song) => ({ type: ADD_SONG_TO_MY_MUSIC, song })
 
-export const setSearchValue = (searchValue) => ({ type: SET_SEARCH_VALUE, searchValue })
-export const searchMusic = (songName) => ({ type: SEARCH_MUSIC, songName})
+export const setSearchMusic = (music) => ({ type: SET_SEARCH_MUSIC, music})
 
+export const searchMusic = (songName) => async dispatch => {
+    try {
+        const res = await fetch(`http://localhost:3001/api/music?search=${songName}`)
+        const data = await res.json()
+        if (res.status !== 200) throw Error(data.message)
+        dispatch(setSearchMusic(data))
+    }
+    catch(err) {
+        console.log(err)
+    }
+}
+export const addSongToMyMusicSuccess = (song) => ({ type: ADD_SONG_TO_MY_MUSIC_SUCCESS, song })
+export const addSongToMyMusic = (userId, song) => async dispatch => {
+    try {
+        const res = await fetch(`http://localhost:3001/api/users/${userId}/music/${song._id}`, {
+            method: "PUT",
+        })
+        const data = await res.json()
+        if (res.status !== 200) throw Error(data.message)
+        dispatch(addSongToMyMusicSuccess(song))
+    }
+    catch(err) {
+        console.log(err)
+    }
+}
+
+export const removeFromMyMusicSuccess = (song) => ({ type: REMOVE_FROM_MY_MUSIC_SUCCESS, song })
+export const removeSongFromMyMusic = (userId, song) => async dispatch => {
+    try {
+        const res = await fetch(`http://localhost:3001/api/users/${userId}/music/${song._id}`, {
+            method: "DELETE",
+        })
+        const data = await res.json()
+        if (res.status !== 200) throw Error(data.message)
+        dispatch(removeFromMyMusicSuccess(song))
+    }
+    catch(err) {
+        console.log(err)
+    }
+}
 
 export default MusicReducer
 

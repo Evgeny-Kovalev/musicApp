@@ -5,7 +5,7 @@ import Search from '../Search/Search'
 import { setSidebarState } from '../../redux/AppReducer'
 import './Header.scss'
 
-const Header = ({setSidebarState}) => {
+const Header = ({setSidebarState, isAuth}) => {
 
     const history = useHistory()
 
@@ -15,7 +15,7 @@ const Header = ({setSidebarState}) => {
                 <i className="fas fa-bars"></i>
             </div>
             <div className="header__back" onClick={() => history.goBack()}>
-                <img class="header__back_img" src="/img/arrow-square-left.svg" alt="" />
+                <img className="header__back_img" src="/img/arrow-square-left.svg" alt="" />
             </div>
             <Search />
             <nav className="top_nav">
@@ -31,9 +31,17 @@ const Header = ({setSidebarState}) => {
                         </NavLink>
                     </li> */}
                     <li className="top_nav__item">
-                        <NavLink to="/auth" >
-                            <input className="myBtn" type="button" value="Sing in"/>
-                        </NavLink>
+                        {
+                            isAuth 
+                            ?
+                            <NavLink to="/logout" >
+                                <input className="myBtn" type="button" value="Log out"/>
+                            </NavLink>
+                            :
+                            <NavLink to="/auth" >
+                                <input className="myBtn" type="button" value="Log in"/>
+                            </NavLink>
+                        }
                     </li>
                 </ul>
             </nav>
@@ -43,13 +51,11 @@ const Header = ({setSidebarState}) => {
 
 
 const mapStateToProps = state => ({
-
+    isAuth: state.auth.isAuth
 })
 
 const mapDispatchToProps = dispatch => ({
-    setSidebarState: (isOpen) => {
-        dispatch(setSidebarState(isOpen))
-    }
+    setSidebarState: (isOpen) => dispatch(setSidebarState(isOpen))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Header)

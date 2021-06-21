@@ -22,7 +22,7 @@ const MusicPlayerReducer = (state = initialState, action) => {
                 ...state,
                 playing: true,
                 currentSong: action.song || state.currentSong,
-                currentSongId: action.song?.id || state.currentSongId
+                currentSongId: action.song?._id || state.currentSongId
             }
         case PAUSE:
             return { ...state, playing: false }

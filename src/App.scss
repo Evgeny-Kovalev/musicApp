@@ -71,4 +71,8 @@ a {
     height: 40px;
 }
 
+footer {
+    min-height: $playerHeight;
+}
+
 @import './css/media.scss'

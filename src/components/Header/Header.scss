@@ -67,6 +67,12 @@
     .mobile_burger {
         display: block;
     }
+
+    .header {
+        &__back {
+            display: none;
+        }
+    }
 }
 
 // Medium devices (tablets, less than 992px)

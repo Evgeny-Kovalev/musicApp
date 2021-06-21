@@ -5,7 +5,7 @@ import { setSidebarState } from '../../redux/AppReducer'
 import Search from '../Search/Search'
 import './Sidebar.scss'
 
-const Sidebar = ({isOpen, setSidebarState, isAuth}) => {
+const Sidebar = ({isOpen, setSidebarState, isAuth, authUser}) => {
 
     return (
         <div className={"sidebar " + (isOpen ? "sidebar--active" : "")}>
@@ -18,10 +18,10 @@ const Sidebar = ({isOpen, setSidebarState, isAuth}) => {
                     <NavLink className="profile__link" to="/">
                         <img className="profile__img" src="/img/profile.jpg" alt=""/>
                     </NavLink>
-                    <NavLink className="profile__link" to="/">
-                        <h4 className="profile__name">Farzan Faruk</h4>
-                    </NavLink>
-                    <div className="profile__email">email@email.com</div>
+                    {/* <NavLink className="profile__link" to="/"> */}
+                        <h4 className="profile__name">{authUser.name}</h4>
+                    {/* </NavLink> */}
+                    <div className="profile__email">{authUser.email}</div>
                 </div>
             :
                 <div className="logo">
@@ -69,7 +69,8 @@ const Sidebar = ({isOpen, setSidebarState, isAuth}) => {
 
 const mapStateToProps = state => ({
     isOpen: state.app.sidebar.isOpen,
-    isAuth: state.auth.isAuth
+    isAuth: state.auth.isAuth,
+    authUser: state.auth.user
 })
 
 const mapDispatchToProps = dispatch => ({

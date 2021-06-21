@@ -4,6 +4,7 @@ import AuthReducer from "./AuthReducer";
 import MusicPlayerReducer from "./MusicPlayerReducer";
 import thunk from "redux-thunk";
 import PlaylistsReducer from "./PlaylistsReducer";
+import CommentsReducer from "./CommentsReducer";
 import MusicReducer from "./MusicReducer";
 
 const reducers = combineReducers({
@@ -11,6 +12,7 @@ const reducers = combineReducers({
     music: MusicReducer,
     player: MusicPlayerReducer,
     auth: AuthReducer,
+    comments: CommentsReducer,
     app: AppReducer,  
 })
 

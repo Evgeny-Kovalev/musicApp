@@ -1,12 +1,47 @@
 import React from 'react'
-import { withRouter } from 'react-router';
-import CircleBtn from '../Buttons/CircleBtn';
+import { connect } from 'react-redux';
+    import CircleBtn from '../Buttons/CircleBtn';
 import './MusicCard.scss';
 
-const MusicCard = ({content, isPlaylist = false, deletePlaylist}) => {
+const MusicCard = ({content, isPlaylist = false, deleteFromMyPlaylists, deleteFromMyMusic, addToMyMusic, addToMyPlaylists, isAuth, isMy}) => {
 
     if (!content) return null
-    const {id, title, plays, likes, artist, img} = content
+    const {_id: id, title, plays, likes, artist, img} = content
+
+    let buttons = null
+
+    if (isAuth) {
+        if (isPlaylist) {
+            buttons = isMy
+            ? 
+            <CircleBtn
+                className="song_card__circle_item" 
+                type="close" 
+                onClick={() => deleteFromMyPlaylists(content)}
+            />
+            :
+            <CircleBtn
+                className="song_card__circle_item" 
+                type="add" 
+                onClick={() => addToMyPlaylists(content)}
+            />
+        }
+        else {
+            buttons = isMy
+            ? 
+            <CircleBtn
+                className="song_card__circle_item" 
+                type="close" 
+                onClick={() => deleteFromMyMusic(content)}
+            />
+            :
+            <CircleBtn
+                className="song_card__circle_item" 
+                type="add" 
+                onClick={() => addToMyMusic(content)}
+            />
+        }
+    }
 
     return (
         <div className="song_card">
@@ -26,20 +61,7 @@ const MusicCard = ({content, isPlaylist = false, deletePlaylist}) => {
                     </div>
                     <div className="song_card__right">
                         <div className="song_card__right_inner">
-                            {/* <CircleBtn 
-                                className="song_card__circle_item" 
-                                type="like" 
-                                isActive={isLiked} 
-                                onClick={onLikeSongClick}
-                            /> */}
-                            {
-                                isPlaylist &&
-                                <CircleBtn
-                                    className="song_card__circle_item" 
-                                    type="close" 
-                                    onClick={() => deletePlaylist(id)}
-                                />
-                            }
+                            { buttons }
                         </div>
                     </div>
                 </div>
@@ -48,4 +70,13 @@ const MusicCard = ({content, isPlaylist = false, deletePlaylist}) => {
     )
 }
 
-export default withRouter(MusicCard)
+const mapStateToProps = state => ({
+    isAuth: state.auth.isAuth
+})
+
+const mapDispatchToProps = dispatch => ({
+
+})
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(MusicCard)

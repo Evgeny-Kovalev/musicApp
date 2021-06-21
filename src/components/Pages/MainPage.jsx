@@ -1,18 +1,23 @@
 import React, { useEffect } from 'react'
 import { Spinner, Alert } from 'react-bootstrap'
 import { connect } from 'react-redux'
+import { NavLink } from 'react-router-dom'
 import { initLikedMusic, initMyMusic } from '../../redux/MusicReducer'
 import { initMyPlaylists } from '../../redux/PlaylistsReducer'
 import Music from '../Music/Music'
 import Playlists from '../Playlists/Playlists'
 import Title from '../Title/Title'
 
-const MainPage = ({myMusic, myPlaylists, initMyMusic, initMyPlaylists, myPlaylistsError, myMusicError, initLikedMusic}) => {
+const MainPage = ({myMusic, myPlaylists, initMyMusic, initMyPlaylists, myPlaylistsError, myMusicError, initLikedMusic, isAuth, user}) => {
     useEffect(() => {
-        initLikedMusic()
-        initMyPlaylists()
-        initMyMusic()
-    }, [initMyMusic, initMyPlaylists ])
+        if (user?.id) {
+            initLikedMusic(user.id)
+            initMyPlaylists(user.id)
+            initMyMusic(user.id)
+        }
+    }, [])
+    
+    if (!isAuth) return <Alert variant="info" >Please <NavLink to="/auth">log in</NavLink></Alert>
 
     let playlists = myPlaylistsError 
         ? <Alert variant="danger" >Playlists can't be loaded!</Alert>
@@ -34,9 +39,9 @@ const MainPage = ({myMusic, myPlaylists, initMyMusic, initMyPlaylists, myPlaylis
     return (
         <>
             <Title type="full" subtitle="View All" to="/playlists/" >My Last Playlists</Title>
-            { playlists }
+            {playlists}
             <Title type="subtitle" subtitle={(myMusic?.length || "0") + " Songs"} >My music</Title>
-            { music }
+            {music}
         </>
     )
 }
@@ -46,13 +51,15 @@ const mapStateToProps = state => ({
     mymyMusicError: state.music.my.error,
     
     myPlaylists: state.playlists.my.list,
-    myPlaylistsError: state.playlists.my.error
+    myPlaylistsError: state.playlists.my.error,
+    isAuth: state.auth.isAuth,
+    user: state.auth.user,
 })
 
 const mapDispatchToProps = dispatch => ({
-    initLikedMusic: () => dispatch(initLikedMusic()),
-    initMyMusic: () => dispatch(initMyMusic()),
-    initMyPlaylists: () => dispatch(initMyPlaylists()),
+    initLikedMusic: (userId) => dispatch(initLikedMusic(userId)),
+    initMyMusic: (userId) => dispatch(initMyMusic(userId)),
+    initMyPlaylists: (userId) => dispatch(initMyPlaylists(userId)),
 })
 
 

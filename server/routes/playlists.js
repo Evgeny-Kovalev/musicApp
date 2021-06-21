@@ -4,10 +4,10 @@ const playlistController = require('../controllers/playlists')
 const router = express.Router()
 
 router.get("/", playlistController.getPlaylists)
-router.post("/", playlistController.postPlaylist)
+router.post("/", playlistController.postCreatePlaylist)
 
-router.post("/:id/music", playlistController.postPlaylistMusic)
-router.delete("/:id/music", playlistController.deletePlaylistMusic)
+router.post("/:playlistId/music/:songId", playlistController.postAddSongToPlaylist)
+router.delete("/:playlistId/music/:songId", playlistController.deleteSongFromPlaylist)
 
 router.get("/:id", playlistController.getPlaylist)
 router.delete("/:id", playlistController.deletePlaylist)

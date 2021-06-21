@@ -2,36 +2,37 @@ import React, { useState } from 'react'
 import PlaylistItem from './PlaylistItem';
 import {Alert, Button, Form, Modal} from 'react-bootstrap'
 import { connect } from 'react-redux';
-import { createNewPlaylistStart } from '../../redux/PlaylistsReducer';
+import { createNewMyPlaylistStart } from '../../redux/PlaylistsReducer';
 import './Playlists.scss';
 
-const Playlists = ({playlists, createNewPlaylistStart, withAdding, limit}) => {
+const Playlists = ({playlists, createNewMyPlaylist, withAdding, limit, isAuth, user}) => {
 
     const [modalActive, setModalActive] = useState(false);
-    const [newPlaylistName, setNewPlaylistName] = useState("")
+    const [newPlaylistTitle, setNewPlaylistTitle] = useState("")
 
     const handleCreateNewPlaylist = () => {
-        if (newPlaylistName !== "") {
+        if (newPlaylistTitle !== "" && user?.id) {
             const playlist = {
-                title: newPlaylistName,
-                imageUrl: "https://via.placeholder.com/1000"
+                title: newPlaylistTitle,
+                img: "https://via.placeholder.com/1000"
             }
-            createNewPlaylistStart(playlist)
+            createNewMyPlaylist(user.id, playlist)
         }
-        setNewPlaylistName("")
+        setNewPlaylistTitle("")
         setModalActive(false)
     }
 
     const playlistsEl = []
 
     let idx = 0
+
     for (let playlist of playlists) {
         if (idx === limit) break
 
-        playlistsEl.push(
+        playlist && playlistsEl.push(
             <PlaylistItem
-                key={"p-" + playlist.id}
-                id={playlist.id}
+                key={"p-" + playlist._id}
+                id={playlist._id}
                 title={playlist.title}
                 img={playlist.img}
                 musicCount={playlist?.music?.length}
@@ -49,7 +50,7 @@ const Playlists = ({playlists, createNewPlaylistStart, withAdding, limit}) => {
             <div className="playlists">
                 <ul className="playlists__list myRow">
                     {
-                        withAdding &&
+                        withAdding && isAuth && 
                         <li className="playlists__item playlists__item--add" onClick={() => setModalActive(true)} >
                             <div className="playlists__add"></div>
                         </li>
@@ -68,7 +69,7 @@ const Playlists = ({playlists, createNewPlaylistStart, withAdding, limit}) => {
                             <Form.Control 
                                 type="text"
                                 placeholder="Playlist title..."
-                                onChange={(e) => setNewPlaylistName(e.target.value)}
+                                onChange={(e) => setNewPlaylistTitle(e.target.value)}
                             />
                         </Form.Group>
                         <Form.Group>
@@ -87,11 +88,12 @@ const Playlists = ({playlists, createNewPlaylistStart, withAdding, limit}) => {
 }
 
 const mapStateToProps = state => ({
-
+    isAuth: state.auth.isAuth,
+    user: state.auth.user,
 })
 
 const mapDispatchToProps = dispatch => ({
-    createNewPlaylistStart: (playlist) => dispatch(createNewPlaylistStart(playlist))
+    createNewMyPlaylist: (userId, playlist) => dispatch(createNewMyPlaylistStart(userId, playlist))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Playlists)

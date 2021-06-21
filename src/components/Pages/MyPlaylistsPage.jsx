@@ -1,17 +1,20 @@
 import React, { useEffect } from 'react'
 import { Alert, Spinner } from 'react-bootstrap'
 import { connect } from 'react-redux'
+import { compose } from 'redux'
 import { initMyPlaylists } from '../../redux/PlaylistsReducer'
+import withAuthRedirect from '../hoc/withAuthRedirect'
 import Playlists from '../Playlists/Playlists'
 import Title from '../Title/Title'
 
-const MyPlaylistsPage = ({myPlaylists, myPlaylistsError, playlistsLoading, initMyPlaylists}) => {
+const MyPlaylistsPage = ({myPlaylists, myPlaylistsError, playlistsLoading, initMyPlaylists, user}) => {
 
     useEffect(() => {
-        initMyPlaylists()
-    }, [initMyPlaylists])
+        if (user?.id) {
+            initMyPlaylists(user.id)
+        }
+    }, [user.id, initMyPlaylists])
 
-    
     let playlists = myPlaylistsError 
     ? <Alert variant="danger" >Music can't be loaded!</Alert>
     : <Spinner animation="border" role="status"></Spinner>
@@ -19,6 +22,7 @@ const MyPlaylistsPage = ({myPlaylists, myPlaylistsError, playlistsLoading, initM
     if (myPlaylists) {
         playlists = <Playlists playlists={myPlaylists} withAdding />
     }
+
     return (
         <>
             <Title>My Playlists</Title>
@@ -29,11 +33,14 @@ const MyPlaylistsPage = ({myPlaylists, myPlaylistsError, playlistsLoading, initM
 const mapStateToProps = state => ({
     myPlaylists: state.playlists.my.list,
     myPlaylistsError: state.playlists.my.error,
+    user: state.auth.user,
 })
 
 const mapDispatchToProps = dispatch => ({
-    initMyPlaylists: () => dispatch(initMyPlaylists()),
+    initMyPlaylists: (userId) => dispatch(initMyPlaylists(userId)),
 })
 
-
-export default connect(mapStateToProps, mapDispatchToProps)(MyPlaylistsPage)
+export default compose(
+    connect(mapStateToProps, mapDispatchToProps),
+    withAuthRedirect
+)(MyPlaylistsPage)
