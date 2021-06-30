@@ -5,7 +5,33 @@ import { setSidebarState } from '../../redux/AppReducer'
 import Search from '../Search/Search'
 import './Sidebar.scss'
 
-const Sidebar = ({isOpen, setSidebarState, isAuth, authUser}) => {
+const Sidebar = ({isOpen, setSidebarState, isAuth, authUser, items}) => {
+
+    const sidebarItems = items.map(item => {
+        if (item.type === 'item') {
+            return (
+                <li className="sidebar_nav__item" key={item.title}>
+                    <NavLink
+                        exact
+                        to={item.path}
+                        className="sidebar_nav__link"
+                        activeClassName="sidebar_nav__link--active"
+                        onClick={() => setSidebarState(false)}
+                    >    
+                        <div className="sidebar_nav__item_icon">{item.icon}</div>
+                        <div className="sidebar_nav__item_text">{item.title}</div>
+                    </NavLink>
+                </li>        
+            )
+        }
+        if (item.type === 'title') {
+            return (
+                <li className="sidebar_nav__item--title" key={item.title}>
+                    {item.title}
+                </li>
+            )
+        }
+    })
 
     return (
         <div className={"sidebar " + (isOpen ? "sidebar--active" : "")}>
@@ -34,33 +60,7 @@ const Sidebar = ({isOpen, setSidebarState, isAuth, authUser}) => {
             <Search isMobile={true} />
             <div className="sidebar__nav sidebar_nav">
                 <ul className="sidebar_nav__list">
-                    <li className="sidebar_nav__item">
-                        <NavLink exact to="/" className="sidebar_nav__link" activeClassName="sidebar_nav__link--active">    
-                            <div className="sidebar_nav__item_icon"><i className="fas fa-home"></i></div>
-                            <div className="sidebar_nav__item_text">Home</div>
-                        </NavLink>
-                    </li>  
-                    <li className="sidebar_nav__item">
-                        <NavLink to="/popular" className="sidebar_nav__link" activeClassName="sidebar_nav__link--active">    
-                            <div className="sidebar_nav__item_icon"><i className="fas fa-fire"></i></div>
-                            <div className="sidebar_nav__item_text">Most Popular</div>
-                        </NavLink>
-                    </li> 
-                </ul>
-                <div className="sidebar_nav__title">My Music</div>
-                <ul className="sidebar_nav__list">
-                    <li className="sidebar_nav__item">
-                        <NavLink to="/playlists" className="sidebar_nav__link"  activeClassName="sidebar_nav__link--active">    
-                            <div className="sidebar_nav__item_icon"><i className="fas fa-compact-disc"></i></div>
-                            <div className="sidebar_nav__item_text">My Playlists</div>
-                        </NavLink>
-                    </li>
-                    <li className="sidebar_nav__item">
-                        <NavLink to="/liked" className="sidebar_nav__link"  activeClassName="sidebar_nav__link--active">    
-                            <div className="sidebar_nav__item_icon"><i className="fas fa-thumbs-up"></i></div>
-                            <div className="sidebar_nav__item_text">Liked Music</div>
-                        </NavLink>
-                    </li>  
+                    {sidebarItems}
                 </ul>
             </div>
         </div>

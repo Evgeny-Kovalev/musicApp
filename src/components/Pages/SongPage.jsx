@@ -15,7 +15,7 @@ const SongPage = ({currentSong, initSong, isAuth, initSongComments, initMyMusic,
     const {songId} = useParams()
 
     useEffect(() => {
-        user?.id && initMyMusic(user?.id)
+        user?.id && initMyMusic(user)
         if (songId) {
             initSong(songId)
             initSongComments(songId)
@@ -26,23 +26,25 @@ const SongPage = ({currentSong, initSong, isAuth, initSongComments, initMyMusic,
 
     const deleteSongHandle = (song) => {
         if (user?.id) {
-            removeSongFromMyMusic(user.id, song)
+            removeSongFromMyMusic(user, song)
         }
     }
     const addToMyMusicHandle = (song) => {
         if (user?.id) {
-            addSongToMyMusic(user.id, song)
+            addSongToMyMusic(user, song)
         }
     }
 
     const commentSubmitHandler = comment => {
         if (user?.id) {
-            addSongComment(user.id, songId, comment)
+            addSongComment(user, songId, comment)
         }
     }
 
     return (
         <>
+        {
+            currentSong &&
             <MusicCard
                 id={songId}
                 content={currentSong}
@@ -50,6 +52,7 @@ const SongPage = ({currentSong, initSong, isAuth, initSongComments, initMyMusic,
                 addToMyMusic={addToMyMusicHandle}
                 deleteFromMyMusic={deleteSongHandle}
             />
+        }
             {
                 isAuth &&
                 <>
@@ -79,9 +82,9 @@ const mapDispatchToProps = dispatch => ({
     initSong: (songId) => dispatch(initSong(songId)),
     initSongComments: (songId) => dispatch(initSongComments(songId)),
     initMyMusic: (userId) => dispatch(initMyMusic(userId)),
-    removeSongFromMyMusic: (userId, song) => dispatch(removeSongFromMyMusic(userId, song)),
-    addSongToMyMusic: (userId, song) => dispatch(addSongToMyMusic(userId, song)),
-    addSongComment: (userId, song, comment) => dispatch(addSongComment(userId, song, comment)),
+    removeSongFromMyMusic: (user, song) => dispatch(removeSongFromMyMusic(user, song)),
+    addSongToMyMusic: (user, song) => dispatch(addSongToMyMusic(user, song)),
+    addSongComment: (user, song, comment) => dispatch(addSongComment(user, song, comment)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(SongPage)

@@ -5,7 +5,7 @@ import Search from '../Search/Search'
 import { setSidebarState } from '../../redux/AppReducer'
 import './Header.scss'
 
-const Header = ({setSidebarState, isAuth}) => {
+const Header = ({setSidebarState, isAuth, user, withSearch}) => {
 
     const history = useHistory()
 
@@ -17,7 +17,9 @@ const Header = ({setSidebarState, isAuth}) => {
             <div className="header__back" onClick={() => history.goBack()}>
                 <img className="header__back_img" src="/img/arrow-square-left.svg" alt="" />
             </div>
-            <Search />
+            {
+                withSearch && <Search />
+            }
             <nav className="top_nav">
                 <ul className="top_nav__list">
                     {/* <li className="top_nav__item">
@@ -25,11 +27,14 @@ const Header = ({setSidebarState, isAuth}) => {
                             <i className="far fa-bell"></i>
                         </NavLink>
                     </li> */}
-                    {/* <li className="top_nav__item">
-                        <NavLink to="/settings/" className="top_nav__link">
+                    {
+                    user?.roles.includes("ADMIN") &&
+                    <li className="top_nav__item">
+                        <NavLink to="/admin" className="top_nav__link">
                             <i className="far fa-cog"></i>
                         </NavLink>
-                    </li> */}
+                    </li>
+                    }
                     <li className="top_nav__item">
                         {
                             isAuth 
@@ -51,7 +56,8 @@ const Header = ({setSidebarState, isAuth}) => {
 
 
 const mapStateToProps = state => ({
-    isAuth: state.auth.isAuth
+    isAuth: state.auth.isAuth,
+    user: state.auth.user,
 })
 
 const mapDispatchToProps = dispatch => ({

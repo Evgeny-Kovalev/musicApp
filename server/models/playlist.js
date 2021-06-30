@@ -19,6 +19,9 @@ const playlistSchema = new mongoose.Schema({
         default: 0,
         required: true,
     },
+    creator: {
+        type: mongoose.Schema.Types.ObjectId, ref: 'User',
+    },
     custom: {
         type: Boolean,
         default: false,

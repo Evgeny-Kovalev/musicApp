@@ -15,10 +15,14 @@ const songSchema = new mongoose.Schema({
     },
     plays: {
         type: Number,
-        required: true,
+        default: 0,
     },
     likes: {
         type: Number,
+        default: 0,
+    },
+    url: {
+        type: String,
         required: true,
     },
     comments: [

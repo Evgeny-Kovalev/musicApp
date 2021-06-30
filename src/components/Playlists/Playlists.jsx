@@ -9,14 +9,14 @@ const Playlists = ({playlists, createNewMyPlaylist, withAdding, limit, isAuth, u
 
     const [modalActive, setModalActive] = useState(false);
     const [newPlaylistTitle, setNewPlaylistTitle] = useState("")
+    const [playlistImg, setPlaylistImg] = useState()
 
     const handleCreateNewPlaylist = () => {
         if (newPlaylistTitle !== "" && user?.id) {
-            const playlist = {
-                title: newPlaylistTitle,
-                img: "https://via.placeholder.com/1000"
-            }
-            createNewMyPlaylist(user.id, playlist)
+            const formData = new FormData()
+            formData.append('img', playlistImg)
+            formData.append('title', newPlaylistTitle)
+            createNewMyPlaylist(user, formData)
         }
         setNewPlaylistTitle("")
         setModalActive(false)
@@ -74,7 +74,7 @@ const Playlists = ({playlists, createNewMyPlaylist, withAdding, limit, isAuth, u
                         </Form.Group>
                         <Form.Group>
                             <Form.Label>Select image</Form.Label>
-                            <Form.Control type="file" />
+                            <Form.Control type="file" name="img" onChange={(e) => setPlaylistImg(e.target.files[0])} />
                         </Form.Group>
                     </Form>
                 </Modal.Body>
@@ -93,7 +93,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-    createNewMyPlaylist: (userId, playlist) => dispatch(createNewMyPlaylistStart(userId, playlist))
+    createNewMyPlaylist: (user, playlist) => dispatch(createNewMyPlaylistStart(user, playlist))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Playlists)

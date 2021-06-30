@@ -6,6 +6,7 @@ const CircleBtn = ({type, isActive = false, className, onClick}) => {
         {type: "add", iconClass: "fas fa-plus"},
         {type: "like", iconClass: "fas fa-heart"},
         {type: "close", iconClass: "fas fa-times"},
+        {type: "edit", iconClass: "fas fa-pen"},
     ]
 
     let currentType = types.find(item => item.type === type) || types[0]

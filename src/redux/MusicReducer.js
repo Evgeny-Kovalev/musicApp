@@ -1,3 +1,5 @@
+import { musicAPI, usersAPI } from "../components/api/api"
+
 const 
     FETCH_MY_MUSIC_START = 'FETCH_MY_MUSIC_START',
     FETCH_MY_MUSIC_SUCCESS = 'FETCH_MY_MUSIC_SUCCESS',
@@ -18,8 +20,8 @@ const
     SET_CURRENT_SONG = 'SET_CURRENT_SONG',
     SET_SEARCH_VALUE = 'SET_SEARCH_VALUE',
     SET_SEARCH_MUSIC = 'SET_SEARCH_MUSIC',
-    REMOVE_FROM_MY_MUSIC_SUCCESS ='REMOVE_FROM_MY_MUSIC_SUCCESS'
-
+    REMOVE_FROM_MY_MUSIC_SUCCESS ='REMOVE_FROM_MY_MUSIC_SUCCESS',
+    ADD_PLAY_TO_MUSIC_SUCCESS ='ADD_PLAY_TO_MUSIC_SUCCESS'   
 const initialState = {
     search: {
         list: null,
@@ -197,11 +199,10 @@ export const fetchMyMusicStart = () => ({type: FETCH_MY_MUSIC_START})
 export const fetchMyMusicSuccess = (music) => ({type: FETCH_MY_MUSIC_SUCCESS, music})
 export const fetchMyMusicFailed = () => ({type: FETCH_MY_MUSIC_FAILED})
 
-export const initMyMusic = (userId) => async dispatch => {
+export const initMyMusic = (user) => async dispatch => {
     dispatch(fetchMyMusicStart())
     try {
-        const res = await fetch(`http://localhost:3001/api/users/${userId}/music`)
-        const data = await res.json()
+        const [res, data] = await usersAPI.getUserMusic(user)
         if (res.status !== 200) throw Error(data.message)
         dispatch(fetchMyMusicSuccess(data))
     }
@@ -213,8 +214,7 @@ export const initMyMusic = (userId) => async dispatch => {
 
 export const initSong = (songId) => async dispatch => {
     try {
-        const res = await fetch(`http://localhost:3001/api/music/${songId}`)
-        const data = await res.json()
+        const [res, data] = await musicAPI.getSongById(songId)
         if (res.status !== 200) throw Error(data.message)
         dispatch(setCurrentSong(data))
     }
@@ -227,11 +227,10 @@ export const fetchLikedMusicStart = () => ({type: FETCH_LIKED_MUSIC_START})
 export const fetchLikedMusicSuccess = (music) => ({type: FETCH_LIKED_MUSIC_SUCCESS, music})
 export const fetchLikedMusicFailed = () => ({type: FETCH_LIKED_MUSIC_FAILED})
 
-export const initLikedMusic = (userId) => async dispatch => {
+export const initLikedMusic = (user) => async dispatch => {
     dispatch(fetchLikedMusicStart())
     try {
-        const res = await fetch(`http://localhost:3001/api/users/${userId}/music/liked`)
-        const data = await res.json()
+        const [res, data] = await usersAPI.getUserLikedMusic(user)
         if (res.status !== 200) throw Error(data.message)
         dispatch(fetchLikedMusicSuccess(data))
     }
@@ -241,17 +240,9 @@ export const initLikedMusic = (userId) => async dispatch => {
     }
 }
 
-export const likeSong = (userId, song) => async dispatch => {
-    const url = `http://localhost:3001/api/music/${song._id}/like`
+export const likeSong = (user, song) => async dispatch => {
     try {
-        const res = await fetch(url, {
-            method: 'POST',
-            body: JSON.stringify({ userId }),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        const data = await res.json()
+        const [res, data] = await musicAPI.likeSong(user, song)
         if (res.status !== 200) throw Error(data.message)
         dispatch({ type: LIKE_SONG, song })
     }
@@ -259,17 +250,10 @@ export const likeSong = (userId, song) => async dispatch => {
         console.error('Error:', err)
     }
 }
-export const unlikeSong = (userId, song) => async dispatch => {
-    const url = `http://localhost:3001/api/music/${song._id}/like`
+
+export const unlikeSong = (user, song) => async dispatch => {
     try {
-        const res = await fetch(url, {
-            method: 'DELETE',
-            body: JSON.stringify({ userId }),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        const data = await res.json()
+        const [res, data] = await musicAPI.unlikeSong(user, song)
         if (res.status !== 200) throw Error(data.message)
         dispatch({ type: UNLIKE_SONG, song })
     }
@@ -282,11 +266,13 @@ export const fetchPopularMusicStart = () => ({ type: FETCH_POPULAR_MUSIC_START }
 export const fetchPopularMusicFail = () => ({ type: FETCH_POPULAR_MUSIC_FAILED })
 export const fetchPopularMusicSuccess = (music) => ({ type: FETCH_POPULAR_MUSIC_SUCCESS, music })
 
-export const initPopularMusic = () => async dispatch => {
+export const initPopularMusic = (user) => async dispatch => {
     dispatch(fetchPopularMusicStart())
     try {
-        const res = await fetch("http://localhost:3001/api/music/?orderBy=likes&order=-1")
-        const data = await res.json()
+        const [res, data] = await musicAPI.getMusic(user, {
+            orderBy: 'likes',
+            order: -1,
+        })
         if (res.status !== 200) throw Error(data.message)
         dispatch(fetchPopularMusicSuccess(data))
     }
@@ -297,11 +283,9 @@ export const initPopularMusic = () => async dispatch => {
 export const setCurrentSong = (song) => ({type: SET_CURRENT_SONG, song})
 
 export const setSearchMusic = (music) => ({ type: SET_SEARCH_MUSIC, music})
-
-export const searchMusic = (songName) => async dispatch => {
+export const searchMusic = (user, songName) => async dispatch => {
     try {
-        const res = await fetch(`http://localhost:3001/api/music?search=${songName}`)
-        const data = await res.json()
+        const [res, data] = await musicAPI.getMusic(user, { songName })
         if (res.status !== 200) throw Error(data.message)
         dispatch(setSearchMusic(data))
     }
@@ -309,13 +293,11 @@ export const searchMusic = (songName) => async dispatch => {
         console.log(err)
     }
 }
+
 export const addSongToMyMusicSuccess = (song) => ({ type: ADD_SONG_TO_MY_MUSIC_SUCCESS, song })
-export const addSongToMyMusic = (userId, song) => async dispatch => {
+export const addSongToMyMusic = (user, song) => async dispatch => {
     try {
-        const res = await fetch(`http://localhost:3001/api/users/${userId}/music/${song._id}`, {
-            method: "PUT",
-        })
-        const data = await res.json()
+        const [res, data] = await usersAPI.addSongToUserMusic(user, song)
         if (res.status !== 200) throw Error(data.message)
         dispatch(addSongToMyMusicSuccess(song))
     }
@@ -325,12 +307,9 @@ export const addSongToMyMusic = (userId, song) => async dispatch => {
 }
 
 export const removeFromMyMusicSuccess = (song) => ({ type: REMOVE_FROM_MY_MUSIC_SUCCESS, song })
-export const removeSongFromMyMusic = (userId, song) => async dispatch => {
+export const removeSongFromMyMusic = (user, song) => async dispatch => {
     try {
-        const res = await fetch(`http://localhost:3001/api/users/${userId}/music/${song._id}`, {
-            method: "DELETE",
-        })
-        const data = await res.json()
+        const [res, data] = await usersAPI.removeSongFromUserMusic(user, song)
         if (res.status !== 200) throw Error(data.message)
         dispatch(removeFromMyMusicSuccess(song))
     }
@@ -338,6 +317,19 @@ export const removeSongFromMyMusic = (userId, song) => async dispatch => {
         console.log(err)
     }
 }
+
+export const addPlayToSong = (song) => async dispatch => {
+    try {
+        const [res, data] = await musicAPI.addPlayToSong(song)
+
+        if (res.status !== 200) throw Error(data.message)
+    }
+    catch(err) {
+        console.log(err)
+    }
+}
+
+
 
 export default MusicReducer
 

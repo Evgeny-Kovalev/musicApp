@@ -1,3 +1,5 @@
+import { usersAPI, playlistAPI } from "../components/api/api"
+
 const 
     FETCH_MY_PLAYLISTS_START = 'FETCH_MY_PLAYLISTS_START',
     FETCH_MY_PLAYLISTS_SUCCESS = 'FETCH_MY_PLAYLISTS_SUCCESS',
@@ -10,11 +12,12 @@ const
     DELETE_PLAYLIST_SUCCESS = 'DELETE_PLAYLIST_SUCCESS',
     ADD_PLAYLIST_SUCCESS = 'ADD_PLAYLIST_SUCCESS',
 
-    ADD_SONG_TO_PLAYLIST = 'ADD_SONG_TO_PLAYLIST',
-    REMOVE_SONG_FROM_PLAYLIST = 'REMOVE_SONG_FROM_PLAYLIST',
+    ADD_SONG_TO_PLAYLIST_SUCCESS = 'ADD_SONG_TO_PLAYLIST_SUCCESS',
+    REMOVE_SONG_FROM_PLAYLIST_SUCCESS = 'REMOVE_SONG_FROM_PLAYLIST_SUCCESS',
     
     SET_CURRENT_PLAYLIST = 'SET_CURRENT_PLAYLIST',
-    SET_MY_PLAYLIST_MUSIC = 'SET_MY_PLAYLIST_MUSIC'
+    SET_MY_PLAYLIST_MUSIC = 'SET_MY_PLAYLIST_MUSIC',
+    EDIT_PLAYLIST_SUCCESS = 'EDIT_PLAYLIST_SUCCESS'
 
 const initialState = {
     all: {
@@ -96,15 +99,15 @@ const PlaylistsReducer = (state = initialState, action) => {
                 }
             }
 
-        case ADD_SONG_TO_PLAYLIST:
+        case ADD_SONG_TO_PLAYLIST_SUCCESS:
             const myPlaylists = [...state.my.list]
 
-            const currentPlaylist = myPlaylists.find(playlist => (playlist._id.toString() === action.playlistId.toString()))
-            currentPlaylist.music = currentPlaylist.music ? [...currentPlaylist.music] : []
+            const currentPlaylist = myPlaylists.find(playlist => playlist._id.toString() === action.playlistId.toString())
             
-            if (!currentPlaylist.music.some(song => song._id.toString() === action.song._id.toString())) {
-                currentPlaylist.music = [action.song, ...currentPlaylist.music]
-            }
+            currentPlaylist.music = [
+                action.song,
+                ...currentPlaylist.music.filter(song => song._id.toString() !== action.song._id.toString())
+            ]
 
             return {
                 ...state,
@@ -114,7 +117,7 @@ const PlaylistsReducer = (state = initialState, action) => {
                 }
             }
 
-        case REMOVE_SONG_FROM_PLAYLIST: {
+        case REMOVE_SONG_FROM_PLAYLIST_SUCCESS: {
             return {
                 ...state,
                 my: {
@@ -125,7 +128,7 @@ const PlaylistsReducer = (state = initialState, action) => {
                     ...state.currentPlaylist,
                     music: state.currentPlaylist.music.filter(
                         song => song._id.toString() !== action.song._id.toString()
-                        )
+                    )
                 }
             }
         }
@@ -155,6 +158,28 @@ const PlaylistsReducer = (state = initialState, action) => {
                     list: newList
                 }
             }
+        case EDIT_PLAYLIST_SUCCESS: 
+            const playlistIndex = state.my.list.findIndex(playlist => playlist._id.toString() === action.playlist._id.toString())
+            const playlists = [...state.my.list]
+            playlists[playlistIndex] = {
+                ...state.my.list[playlistIndex],
+                ...action.newData
+            }
+            let current = {...state.currentPlaylist}
+            if (state.currentPlaylist._id.toString() === action.playlist._id.toString()) {
+                current = {
+                    ...state.my.list[playlistIndex],
+                    ...action.newData
+                }
+            }
+            return {
+                ...state,
+                my: {
+                    ...state.my,
+                    list: playlists
+                },
+                currentPlaylist: current
+            }
         default:
             return state
     }
@@ -170,18 +195,17 @@ export const fetchPopularPlaylistsStart = () => ({type: FETCH_POPULAR_PLAYLISTS_
 export const fetchPopularPlaylistsSuccess = (playlists) => ({type: FETCH_POPULAR_PLAYLISTS_SUCCESS, playlists})
 export const fetchPopularPlaylistsFailed = () => ({type: FETCH_POPULAR_PLAYLISTS_FAILED})
 
-export const addSongToPlaylist = (playlistId, song) => ({ type: ADD_SONG_TO_PLAYLIST, playlistId, song })
-export const removeSongFromPlaylist = (playlistId, song) => ({ type: REMOVE_SONG_FROM_PLAYLIST, playlistId, song })
+export const addSongToPlaylistSuccess = (playlistId, song) => ({ type: ADD_SONG_TO_PLAYLIST_SUCCESS, playlistId, song })
+export const removeSongFromPlaylistSuccess = (playlistId, song) => ({ type: REMOVE_SONG_FROM_PLAYLIST_SUCCESS, playlistId, song })
 
 export const setCurrentPlaylist = playlist => ({ type: SET_CURRENT_PLAYLIST, playlist })
 export const setMyPlaylistMusic = (playlistId, music) => ({ type: SET_MY_PLAYLIST_MUSIC, playlistId, music })
 
 
-export const initMyPlaylists = (userId) => async dispatch => {
+export const initMyPlaylists = (user) => async dispatch => {
     dispatch(fetchMyPlaylistsStart())
     try {
-        const res = await fetch(`http://localhost:3001/api/users/${userId}/playlists`)
-        const data = await res.json()
+        const [res, data] = await usersAPI.getUserPlaylists(user)
         if (res.status !== 200) throw new Error(data.message)
         dispatch(fetchMyPlaylistsSuccess(data))
     }
@@ -194,8 +218,7 @@ export const initMyPlaylists = (userId) => async dispatch => {
 export const initPopularPlaylists = () => async dispatch => {
     dispatch(fetchPopularPlaylistsStart())
     try {
-        const res = await fetch(`http://localhost:3001/api/playlists`)
-        const data = await res.json()
+        const [res, data] = await playlistAPI.getPopularPlaylists()
         if (res.status !== 200) throw new Error(data.message)
         dispatch(fetchPopularPlaylistsSuccess(data))
     }
@@ -207,8 +230,7 @@ export const initPopularPlaylists = () => async dispatch => {
 
 export const initPlaylist = (playlistId) => async dispatch => {
     try {
-        const res = await fetch(`http://localhost:3001/api/playlists/${playlistId}`)
-        const data = await res.json()
+        const [res, data] = await playlistAPI.getPlaylistById(playlistId)
         if (res.status !== 200) throw new Error(data.message)
         dispatch(setCurrentPlaylist(data))
     }
@@ -217,16 +239,9 @@ export const initPlaylist = (playlistId) => async dispatch => {
     }
 }
 
-export const createNewMyPlaylistStart = (userId, playlist) => async dispatch => {
+export const createNewMyPlaylistStart = (user, playlist) => async dispatch => {
     try {
-        const res = await fetch(`http://localhost:3001/api/users/${userId}/playlists`, {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(playlist),
-        })
-        const data = await res.json()
+        const [res, data] = await usersAPI.createNewUserPlaylist(user, playlist)
         if (res.status !== 200) throw new Error(data.message)
         dispatch(createNewPlaylistSuccess(data))
     }
@@ -235,17 +250,11 @@ export const createNewMyPlaylistStart = (userId, playlist) => async dispatch => 
     }
 }
 
-export const addSongToPlaylistStart = (playlistId, song) => async dispatch => {
+export const addSongToPlaylist = (user, playlistId, song) => async dispatch => {
     try {
-        const res = await fetch(`http://localhost:3001/api/playlists/${playlistId}/music/${song._id}`, {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        })
-        const data = await res.json()
+        const [res, data] = await usersAPI.addSongToPlaylist(user, playlistId, song)
         if (res.status !== 200) throw new Error(data.message)
-        dispatch(addSongToPlaylist(playlistId, song))
+        dispatch(addSongToPlaylistSuccess(playlistId, song))
 
     }
     catch(err) {
@@ -253,14 +262,11 @@ export const addSongToPlaylistStart = (playlistId, song) => async dispatch => {
     }
 }
 
-export const removeSongFromPlaylistStart = (playlistId, song) => async dispatch => {
+export const removeSongFromPlaylist = (user, playlistId, song) => async dispatch => {
     try {
-        const res = await fetch(`http://localhost:3001/api/playlists/${playlistId}/music/${song._id}`, {
-            method: "DELETE",
-        })
-        const data = await res.json()
+        const [res, data] = await usersAPI.removeSongFromPlaylist(user, playlistId, song)
         if (res.status !== 200) throw new Error(data.message)
-        dispatch(removeSongFromPlaylist(playlistId, song))
+        dispatch(removeSongFromPlaylistSuccess(playlistId, song))
     }
     catch(err) {
         console.error(err)
@@ -268,12 +274,9 @@ export const removeSongFromPlaylistStart = (playlistId, song) => async dispatch 
 }
 
 export const deletePlaylistSuccess = (playlist) => ({ type: DELETE_PLAYLIST_SUCCESS, playlist })
-export const removeFromMyPlaylists = (userId, playlist) => async dispatch => {
+export const removeFromMyPlaylists = (user, playlist) => async dispatch => {
     try {
-        const res = await fetch(`http://localhost:3001/api/users/${userId}/playlists/${playlist._id}`, {
-            method: "DELETE",
-        })
-        const data = res.json()
+        const [res, data] = await usersAPI.removePlaylistFromMy(user, playlist)
         if (res.status !== 200) throw new Error(data.message)
         dispatch(deletePlaylistSuccess(playlist))
     }
@@ -283,14 +286,22 @@ export const removeFromMyPlaylists = (userId, playlist) => async dispatch => {
 }
 
 export const addPlaylistSuccess = (playlist) => ({ type: ADD_PLAYLIST_SUCCESS, playlist })
-export const addToMyPlaylists = (userId, playlist) => async dispatch => {
+export const addToMyPlaylists = (user, playlist) => async dispatch => {
     try {
-        const res = await fetch(`http://localhost:3001/api/users/${userId}/playlists/${playlist._id}`, {
-            method: "PUT",
-        })
-        const data = res.json()
+        const [res, data] = await usersAPI.addPlaylistToMy(user, playlist)
         if (res.status !== 200) throw new Error(data.message)
         dispatch(addPlaylistSuccess(playlist))
+    }
+    catch(err) {
+        console.error(err)
+    }
+}
+
+export const editMyPlaylist = (user, playlist, newData) => async dispatch => {
+    try {
+        const [res, data] = await playlistAPI.editMyPlaylist(user, playlist, newData)
+        if (res.status !== 200) throw new Error(data.message)
+        dispatch({ type: EDIT_PLAYLIST_SUCCESS, playlist, newData })
     }
     catch(err) {
         console.error(err)

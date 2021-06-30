@@ -10,7 +10,7 @@ import Title from '../Title/Title'
 const LikedMusicPage = ({likedMusic, initLikedMusic, musicError, user}) => {
 
     useEffect(() => {
-        user?.id && initLikedMusic(user.id)
+        user?.id && initLikedMusic(user)
     }, [initLikedMusic])
 
     let myLikedMusic = musicError ? <Alert variant="danger" >Music can't be loaded!</Alert>
@@ -36,7 +36,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-    initLikedMusic: (userId) => dispatch(initLikedMusic(userId))
+    initLikedMusic: (user) => dispatch(initLikedMusic(user))
 })
 
 export default compose(

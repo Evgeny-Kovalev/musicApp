@@ -11,7 +11,7 @@ const MyPlaylistsPage = ({myPlaylists, myPlaylistsError, playlistsLoading, initM
 
     useEffect(() => {
         if (user?.id) {
-            initMyPlaylists(user.id)
+            initMyPlaylists(user)
         }
     }, [user.id, initMyPlaylists])
 
@@ -37,7 +37,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-    initMyPlaylists: (userId) => dispatch(initMyPlaylists(userId)),
+    initMyPlaylists: (user) => dispatch(initMyPlaylists(user)),
 })
 
 export default compose(

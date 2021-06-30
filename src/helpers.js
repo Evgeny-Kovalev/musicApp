@@ -33,7 +33,7 @@ export function numFormatter(num) {
 export function urlFromObj(obj) {
     const str = [];
     for (let p in obj) {
-        if (obj.hasOwnProperty(p) && p !== 'url') {
+        if (obj.hasOwnProperty(p) && p !== 'url' && obj[p]) {
             str.push(p + "=" + obj[p]);
         }
     }

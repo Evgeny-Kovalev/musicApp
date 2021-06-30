@@ -1,47 +1,55 @@
 import React from 'react'
+import { useState } from 'react';
 import { connect } from 'react-redux';
-    import CircleBtn from '../Buttons/CircleBtn';
+import { Button, DropdownButton, Dropdown, Form } from 'react-bootstrap';
 import './MusicCard.scss';
 
-const MusicCard = ({content, isPlaylist = false, deleteFromMyPlaylists, deleteFromMyMusic, addToMyMusic, addToMyPlaylists, isAuth, isMy}) => {
+const MusicCard = ({content, isPlaylist = false, deleteFromMyPlaylists, deleteFromMyMusic, addToMyMusic, editMyPlaylist, addToMyPlaylists, isAuth, isMy, user}) => {
 
-    if (!content) return null
-    const {_id: id, title, plays, likes, artist, img} = content
+    const {_id: id, title, plays, likes, artist, img, creator} = content
 
-    let buttons = null
+    const [isEditMode, setIsEditMode] = useState(false)
+    const [titleEditMode, setTitleEditMode] = useState("" || title)
+    
+    const buttons = {}
 
-    if (isAuth) {
-        if (isPlaylist) {
-            buttons = isMy
-            ? 
-            <CircleBtn
-                className="song_card__circle_item" 
-                type="close" 
-                onClick={() => deleteFromMyPlaylists(content)}
-            />
-            :
-            <CircleBtn
-                className="song_card__circle_item" 
-                type="add" 
-                onClick={() => addToMyPlaylists(content)}
-            />
+    if (isPlaylist) {
+        if (isMy) {
+            buttons.text = 'Remove from my playlists'
+            buttons.fun = () => deleteFromMyPlaylists(content)
         }
         else {
-            buttons = isMy
-            ? 
-            <CircleBtn
-                className="song_card__circle_item" 
-                type="close" 
-                onClick={() => deleteFromMyMusic(content)}
-            />
-            :
-            <CircleBtn
-                className="song_card__circle_item" 
-                type="add" 
-                onClick={() => addToMyMusic(content)}
-            />
+            buttons.text = 'Add playlist to my'
+            buttons.fun = () => addToMyPlaylists(content)
         }
     }
+    else {
+        if (isMy) {
+            buttons.text = 'Remove from my music'
+            buttons.fun = () => deleteFromMyMusic(content)
+        }
+        else {
+            buttons.text = 'Add song'
+            buttons.fun = () => addToMyMusic(content)
+        }
+    }
+
+    const editMyPlaylistHandler = () => {
+        editMyPlaylist(content, {title: titleEditMode})
+        setIsEditMode(false)
+    }
+
+    const dropdown = (
+        <DropdownButton id="dropdown-basic-button" title="Actions" className="mr-2">
+        {
+            isPlaylist && isMy && creator === user?.id && !isEditMode &&
+            <Dropdown.Item onClick={() => setIsEditMode(true)}>Edit</Dropdown.Item>
+        }
+        {
+            isAuth && <Dropdown.Item onClick={buttons.fun}>{buttons.text}</Dropdown.Item>
+        }
+        </DropdownButton>
+    )
 
     return (
         <div className="song_card">
@@ -51,7 +59,17 @@ const MusicCard = ({content, isPlaylist = false, deleteFromMyPlaylists, deleteFr
                 </div>
                 <div className="song_card__inner">
                     <div className="song_card__details">
-                        <h2 className="song_card__title">{title}</h2>
+                        {
+                            isEditMode 
+                            ?
+                            <Form.Control
+                                type="text"
+                                value={titleEditMode}
+                                onChange={e => setTitleEditMode(e.target.value)}
+                            />
+                            :
+                            <h2 className="song_card__title">{title}</h2>
+                        }
                         <h3 className="song_card__details_item song_card__details_item--last">{artist}</h3>
                         <div className="song_card__details_item">{plays} Plays</div>
                         <div className="song_card__details_item">{likes} Likes</div>
@@ -61,7 +79,19 @@ const MusicCard = ({content, isPlaylist = false, deleteFromMyPlaylists, deleteFr
                     </div>
                     <div className="song_card__right">
                         <div className="song_card__right_inner">
-                            { buttons }
+                            {   
+                            isAuth && isEditMode 
+                                ?
+                                <>
+                                    <Button className="ml-2" variant="primary" onClick={editMyPlaylistHandler} >
+                                        Save
+                                    </Button>
+                                    <Button className="ml-2" variant="secondary" onClick={() => setIsEditMode(false)} >
+                                        Close
+                                    </Button>
+                                </>
+                                : isAuth && dropdown
+                            }
                         </div>
                     </div>
                 </div>
@@ -71,7 +101,8 @@ const MusicCard = ({content, isPlaylist = false, deleteFromMyPlaylists, deleteFr
 }
 
 const mapStateToProps = state => ({
-    isAuth: state.auth.isAuth
+    isAuth: state.auth.isAuth,
+    user: state.auth.user,
 })
 
 const mapDispatchToProps = dispatch => ({

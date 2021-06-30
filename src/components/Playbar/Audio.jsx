@@ -17,7 +17,7 @@ const Audio = ({state, setDuration, setCurrentTime, setVolume}) => {
 				await audioRef?.current?.pause()
 		}
 		asyncFun()
-	}, [state.playing, state.currentSongId])
+	}, [state.playing, state.currentSong])
 
 	useEffect(() => {
 		if (audioRef.current) audioRef.current.volume = state.volume
@@ -30,8 +30,8 @@ const Audio = ({state, setDuration, setCurrentTime, setVolume}) => {
             loop
             ref={audioRef}
             src={
-                state.currentSongId
-                ? `http://localhost:3001/files/music/${state.currentSongId}.mp3`
+                state.currentSong
+                ? state.currentSong.url
                 : ''
             }
             onLoadedMetadata={() => setDuration(audioRef.current.duration)}

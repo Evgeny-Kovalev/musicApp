@@ -1,25 +1,40 @@
 import React from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useHistory } from 'react-router-dom'
 
-const MusicItem = ({ song, likedMusic, play, pause, playerState,
-     setModalActive, removeSongFromPlaylist, canRemove, likeSongToggle, isAuth }) => {
+const MusicItem = React.memo((props) => {
+    
+    const {
+        song, play, pause, playerState,
+        setModalActive, removeSongFromPlaylist, canRemove, likeSongToggle, isAuth, isLikedSong
+    } = props
 
     const {_id : id, title, artist, img} = song
 
-    const isLikedSong = likedMusic && likedMusic.find(likedSong => likedSong._id === song._id)
+    const history = useHistory()
+
+    const playClickHandler = () => {
+        const playsCount = localStorage.getItem('playsCount')
+        if (!isAuth && playsCount >= 10) 
+            history.push('/auth')
+        else 
+            play(song)
+    }
 
     return (
         <li className="music__item song">
             <NavLink to={"/song/"+id} className="song__link">
                 <img src={img} alt="" className="song__img"/>
                 {
-                    playerState.currentSongId === id && playerState.playing &&
+                    playerState.currentSong?._id=== id && playerState.playing &&
                     <img src="/img/eq.svg" alt="" className="song__img_animation"/>
                 }
             </NavLink>
-            <button className="song__play" onClick={playerState.currentSongId === id && playerState.playing ? pause : () => play(song)}>
+            <button
+                className="song__play"
+                onClick={playerState.currentSong?._id === id && playerState.playing ? pause : playClickHandler}
+            >
             {
-                playerState.currentSongId === id && playerState.playing
+                playerState.currentSong?._id === id && playerState.playing
                 ? <i className="fas fa-pause"></i>
                 : <i className="fas fa-play"></i>
             }
@@ -51,6 +66,12 @@ const MusicItem = ({ song, likedMusic, play, pause, playerState,
             }
         </li>
     )
-}
+}, (props, nextProps) => {
+    return props.song === nextProps.song && 
+        props.playerState.playing === nextProps.playerState.playing && 
+        props.playerState.currentSong === nextProps.playerState.currentSong &&
+        props.likedMusic === nextProps.likedMusic &&
+        props.isLikedSong === nextProps.isLikedSong
+})
 
 export default MusicItem

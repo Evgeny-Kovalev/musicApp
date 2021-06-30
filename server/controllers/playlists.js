@@ -14,6 +14,7 @@ exports.getPlaylist = async (req, res, next) => {
 
 exports.postAddSongToPlaylist = async (req, res, next) => {
     const {playlistId, songId} = req.params
+    const { id } = req.user
 
     const playlist = await Playlist.findById(playlistId)
     if (!playlist) return res.status(404).json({message: "Playlist is not found"})
@@ -21,7 +22,7 @@ exports.postAddSongToPlaylist = async (req, res, next) => {
     const song = await Song.findById(songId)
     if (!song) return res.status(404).json({message: "Song is not found"})
     
-    playlist.music.push(song)
+    playlist.music = [ songId, ...playlist.music.filter(track => track.toString() !== songId.toString()) ]
     await playlist.save()   
 
     res.status(200).json(song)
@@ -52,4 +53,25 @@ exports.deletePlaylist = async (req, res, next) => {
     const {id} = req.params
     const playlist = await Playlist.findByIdAndRemove(id)
     res.status(200).json(playlist)
+}
+
+exports.putEditPlaylist = async (req, res, next) => {
+    try {
+        const {id} = req.params
+        const {userId} = req.user
+        const newData = req.body.playlist
+
+        const playlist = await Playlist.findById(id)
+
+        if (playlist.custom && playlist.creator?.toString() === userId.toString()) {
+            await Playlist.updateOne({ _id: playlist._id }, newData )
+        }
+        else throw Error("This is not your playlist")
+        res.status(200).json({message: 'Playlist updated successfully'})
+
+    }
+    catch(err) {
+        console.log(err);
+        res.status(400).json({message: "Error"})
+    }
 }

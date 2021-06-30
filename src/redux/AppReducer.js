@@ -1,4 +1,4 @@
-import { getAuthUserData } from "./AuthReducer"
+import { setAuthUserData } from "./AuthReducer"
 
 const 
     SET_SIDEBAR_STATE = 'SET_SIDEBAR_STATE',
@@ -34,8 +34,8 @@ const AppReducer = (state = initialState, action) => {
 export const setSidebarState = (isOpen) => ({ type: SET_SIDEBAR_STATE, isOpen })
 export const setInitializedSuccess = () => ({ type: SET_INITIALIZE })
 
-export const initializeApp = () => dispatch => {
-    dispatch(getAuthUserData())
+export const initializeApp = () => async dispatch => {
+    await dispatch(setAuthUserData())
     dispatch(setInitializedSuccess())
 }
 export default AppReducer

@@ -55,6 +55,14 @@
         &_text {
 
         }
+
+        &--title {
+            margin: 40px 0 25px;
+
+            color: $secondaryColor;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
     }
     
     &__link {
@@ -76,11 +84,7 @@
     } 
 
     &__title {
-        margin: 40px 0 25px;
-
-        color: $secondaryColor;
-        text-transform: uppercase;
-        letter-spacing: 2px;
+       
     }
 }
 

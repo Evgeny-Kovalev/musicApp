@@ -1,10 +1,13 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import { useHistory } from 'react-router-dom';
 import { formatSecondsAsTime } from '../../helpers'
 import { pause, play, setCurrentTime, setVolume } from '../../redux/MusicPlayerReducer'
 import './Playbar.scss';
 
-const Playbar = ({playerState, play, pause, setCurrentTime, setVolume, audioRef}) => {
+const Playbar = ({playerState, play, pause, setCurrentTime, setVolume, audioRef, isAuth}) => {
+
+    const history = useHistory()
 
     const rewindSongHandle = e => {
         setCurrentTime(e.target.value)
@@ -19,6 +22,14 @@ const Playbar = ({playerState, play, pause, setCurrentTime, setVolume, audioRef}
         volumeIcon = <i className="fas fa-volume-mute"></i>
     if (playerState.volume > 0.7)
         volumeIcon = <i className="fas fa-volume-up"></i>
+
+    const playClickHandler = () => {
+        const playsCount = localStorage.getItem('playsCount')
+        if (!isAuth && playsCount >= 10) 
+            history.push('/auth')
+        else 
+            play(playerState.currentSong)
+    } 
 
     return (
         <div className="main_player">
@@ -50,7 +61,10 @@ const Playbar = ({playerState, play, pause, setCurrentTime, setVolume, audioRef}
                     {/* <div className="main_player__btn player_btn player_btn--prev">
                         <i className="fa fa-step-backward"></i>
                     </div> */}
-                    <div className="main_player__btn player_btn player_btn--pause" onClick={playerState.playing ? pause : play} >
+                    <div
+                        className="main_player__btn player_btn player_btn--pause"
+                        onClick={ playerState.playing ? pause : playClickHandler }
+                    >
                     {
                         playerState.playing 
                         ? <i className="fa fa-pause-circle fa-2x"></i>
@@ -94,13 +108,14 @@ const Playbar = ({playerState, play, pause, setCurrentTime, setVolume, audioRef}
 }
 
 const mapStateToProps = state => ({
-    playerState: state.player
+    playerState: state.player,
+    isAuth: state.auth.isAuth,
 })
 
 const mapDispatchToProps = dispatch => ({
     setVolume: volume => dispatch(setVolume(volume)),
     setCurrentTime: time => dispatch(setCurrentTime(time)),
-    play: () => dispatch(play()),
+    play: (song) => dispatch(play(song)),
     pause: () => dispatch(pause()),
 })
 

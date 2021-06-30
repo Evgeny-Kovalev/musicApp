@@ -1,12 +1,12 @@
 const Song = require('../models/song')
 const User = require('../models/user')
 
-
 exports.getMusic = async (req, res, next) => {
     const {limit, orderBy, order, search} = req.query
     try {
         const music = await Song
             .find(search && { title: {$regex: '.*' + search + '.*'} })
+            .select('_id title artist img likes plays url')
             .sort({[orderBy]: +order})
             .limit(+limit)
         
@@ -17,11 +17,40 @@ exports.getMusic = async (req, res, next) => {
     }
 }
 
-exports.postSong = async (req, res, next) => {
-    const { title, img, artist, plays, likes } = req.body
-    const song = new Song({ title, img, artist, plays, likes, comments: [] })
+exports.postAddSong = async (req, res, next) => {
+    const baseUrl = 'http://localhost:3001/'
+    const { title, artist } = req.body
+    const songUrl = req.files.song[0].path
+    const imgUrl = req.files.img[0].path
+    if (!songUrl && !imgUrl) return res.status(400).json({message: 'Files not uploaded'})
+
+    const song = new Song({ title, img: baseUrl + imgUrl, url: baseUrl + songUrl, artist, comments: [] })
     const newSong = await song.save()
     return res.status(200).json(newSong)
+}
+
+exports.putEditSong = async (req, res, next) => {
+    try {
+        const { id } = req.params
+        const { songData } = req.body
+
+        const song = await Song.findByIdAndUpdate(id, songData)
+        res.status(200).json({message: 'Song updated successfully', song})
+    }
+    catch(err) {
+        res.status(400).json({message: "Error"})
+    }
+}
+
+exports.deleteSong = async (req, res, next) => {
+    try {
+        const { id } = req.params
+        const music = await Song.findByIdAndRemove(id)
+        res.status(200).json({message: 'Song deleted successfully'})
+    }
+    catch(err) {
+        res.status(400).json({message: "Error"})
+    }
 }
 
 exports.getSong = async (req, res, next) => {
@@ -45,22 +74,21 @@ exports.getSongComments = async (req, res, next) => {
 
 exports.postSongComments = async (req, res, next) => {
     const {id} = req.params
-    const {userId, text} = req.body
-
+    const {text} = req.body
+    const {userId} = req.user
     
     const song = await Song.findById(id)
-    let newComment = { user: userId, text }
+    let newComment = { text }
+    newComment.user = await User.findById(userId)
     song.comments.push(newComment)
     await song.save()   
-    newComment.user = await User.findById(newComment.user)
-
-    res.status(200).json(newComment)
+    res.status(200).json(song.comments[song.comments.length - 1])
 }
 
 
 exports.postAddSongLike = async (req, res, next) => {
     const {songId} = req.params
-    const {userId} = req.body
+    const {userId} = req.user
     
     const user = await User.findById(userId)
     if (!user) return res.status(404).json({message: "User not found"})
@@ -82,7 +110,7 @@ exports.postAddSongLike = async (req, res, next) => {
 
 exports.deleteSongLike = async (req, res, next) => {
     const {songId} = req.params
-    const {userId} = req.body
+    const {userId} = req.user
 
     const user = await User.findById(userId)
     if (!user) return res.status(404).json({message: "User not found"})
@@ -100,4 +128,15 @@ exports.deleteSongLike = async (req, res, next) => {
     await song.save()
     
     return res.status(200).json({status: 200, message: "Like deleted"})
+}
+
+exports.postAddSongPlays = async (req, res, next) => {
+    const {songId} = req.params
+    
+    const song = await Song.findById(songId)
+    if (!song) return res.status(404).json({message: "Song not found"})
+
+    song.plays++
+    await song.save()
+    return res.status(200).json({status: 200, message: "Play added"})
 }

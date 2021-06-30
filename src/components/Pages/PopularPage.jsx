@@ -7,10 +7,10 @@ import Music from '../Music/Music'
 import Playlists from '../Playlists/Playlists'
 import Title from '../Title/Title'
 
-const PopularPage = ({popularMusic, popularPlaylists, initPopularMusic, initPopularPlaylists, loading, musicError, playlistsError}) => {
+const PopularPage = ({popularMusic, popularPlaylists, initPopularMusic, initPopularPlaylists, loading, musicError, playlistsError, user}) => {
 
     useEffect(() => {
-        initPopularMusic()
+        initPopularMusic(user)
         initPopularPlaylists()
     }, [initPopularMusic, initPopularPlaylists])
 
@@ -23,7 +23,7 @@ const PopularPage = ({popularMusic, popularPlaylists, initPopularMusic, initPopu
     if (popularMusic.list) music = <Music music={popularMusic.list} />
     
     let playlists = popularPlaylists.error 
-        ? <Alert variant="danger" >Playlits can't be loaded!</Alert>
+        ? <Alert variant="danger" >Playlist can't be loaded!</Alert>
         : <Spinner animation="border" role="status"></Spinner>
 
     if (popularPlaylists.loading) playlists = <Spinner animation="border" role="status"></Spinner>
@@ -41,12 +41,13 @@ const PopularPage = ({popularMusic, popularPlaylists, initPopularMusic, initPopu
 }
 
 const mapStateToProps = state => ({
+    user: state.auth.user,
     popularMusic: state.music.popular,
     popularPlaylists: state.playlists.popular,
 })
 
 const mapDispatchToProps = dispatch => ({
-    initPopularMusic: () => dispatch(initPopularMusic()),
+    initPopularMusic: (user) => dispatch(initPopularMusic(user)),
     initPopularPlaylists: () => dispatch(initPopularPlaylists())
 })
 

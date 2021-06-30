@@ -6,6 +6,7 @@ import thunk from "redux-thunk";
 import PlaylistsReducer from "./PlaylistsReducer";
 import CommentsReducer from "./CommentsReducer";
 import MusicReducer from "./MusicReducer";
+import AdminReducer from "./AdminReducer";
 
 const reducers = combineReducers({
     playlists: PlaylistsReducer,
@@ -14,6 +15,7 @@ const reducers = combineReducers({
     auth: AuthReducer,
     comments: CommentsReducer,
     app: AppReducer,  
+    admin: AdminReducer,  
 })
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

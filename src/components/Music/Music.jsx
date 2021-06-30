@@ -1,25 +1,31 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {Button, Form, Modal, Alert} from 'react-bootstrap'
 import { connect } from 'react-redux';
 import { pause, play } from '../../redux/MusicPlayerReducer';
 import { likeSong, unlikeSong } from '../../redux/MusicReducer';
-import { addSongToPlaylistStart } from '../../redux/PlaylistsReducer';
+import { addSongToPlaylist } from '../../redux/PlaylistsReducer';
 import MusicItem from './MusicItem';
 import './Music.scss';
 
-const Music = (props) => {
+const Music = React.memo(props => {
     const {
         music, likedMusic, myPlaylists, playerState, play, pause,
         addSongToPlaylist, removeSongFromPlaylist,
         canRemove, playlist, likeSong, unlikeSong, user, isAuth
     } = props
 
-    const myCustomPlaylists = myPlaylists && myPlaylists.filter(list => list && list.custom)
-    // const myCustomPlaylists = myPlaylists
-
-    const [selectedPlaylistId, setSelectedPlaylistId] = useState((myCustomPlaylists && myCustomPlaylists[0]?._id) || "")
+    const [myCustomPlaylists, setMyCustomPlaylists] = useState()
+    const [selectedPlaylistId, setSelectedPlaylistId] = useState()
     const [songToAdd, setSongToAdd] = useState(null)
     const [modalActive, setModalActive] = useState(false)
+
+    useEffect(() => {
+        myPlaylists && setMyCustomPlaylists(myPlaylists.filter(list => list && list.custom))
+    }, [myPlaylists])
+
+    useEffect(() => {
+        myCustomPlaylists && setSelectedPlaylistId(myCustomPlaylists[0]?._id)
+    }, [myCustomPlaylists])
 
     if (music?.length <= 0) return <Alert variant="info" >There are no songs here</Alert>
     
@@ -28,20 +34,20 @@ const Music = (props) => {
         setModalActive(modalActive)
     }
     
-    const addSongHandle = () => {
-        if (selectedPlaylistId && songToAdd) {
-            addSongToPlaylist(selectedPlaylistId, songToAdd)
+    const addSongHandler = () => {
+        if (user && selectedPlaylistId && songToAdd) {
+            addSongToPlaylist(user, selectedPlaylistId, songToAdd)
             setModalActive(false)
         }
     }
     const likeSongHandler = (isLike, song) => {
         if (user?.id) {
             isLike 
-            ? likeSong(user.id, song)
-            : unlikeSong(user.id, song)
+            ? likeSong(user, song)
+            : unlikeSong(user, song)
         }
     }
-    
+
     return (
         <>
         <div className="music">
@@ -54,8 +60,7 @@ const Music = (props) => {
                             playerState={playerState}
                             play={play}
                             pause={pause}
-                            likedMusic={likedMusic}
-                            isLiked={likedMusic ? likedMusic[song.id] : false}
+                            isLikedSong={likedMusic &&likedMusic.find(likedSong => likedSong._id === song._id)}
                             likeSongToggle={likeSongHandler}
                             setModalActive={showModalHandle}
                             canRemove={canRemove}
@@ -67,7 +72,28 @@ const Music = (props) => {
                 }
             </ul>
         </div>
-        <Modal centered show={modalActive} onHide={() => setModalActive(false)} >
+        <AddSongToPlaylistModal
+            show={modalActive}
+            onHide={() => setModalActive(false)}
+            addSongHandler={addSongHandler}
+            selectedPlaylistId={selectedPlaylistId}
+            setSelectedPlaylistId={setSelectedPlaylistId}
+            playlists={myCustomPlaylists}
+        />
+        </>
+    )
+}, (props, nextProps) => {
+    return props.music === nextProps.music &&
+        props.myPlaylists === nextProps.myPlaylists &&
+        props.playerState.playing === nextProps.playerState.playing &&
+        props.playerState.currentSong === nextProps.playerState.currentSong &&
+        props.likedMusic === nextProps.likedMusic
+})
+
+const AddSongToPlaylistModal = React.memo((props) => {
+    const { show, onHide, addSongHandler, selectedPlaylistId, setSelectedPlaylistId, playlists } = props
+    return (
+        <Modal centered show={show} onHide={onHide} >
             <Modal.Header closeButton>
                 <Modal.Title>Add to your Playlist</Modal.Title>
             </Modal.Header>
@@ -75,7 +101,7 @@ const Music = (props) => {
                 <Form>
                     <Form.Group>
                     {
-                        myCustomPlaylists && myCustomPlaylists.length
+                        playlists && playlists.length
                         ?
                         <>
                             <Form.Label>Select Playlist</Form.Label>
@@ -85,7 +111,7 @@ const Music = (props) => {
                                 value={selectedPlaylistId}
                             >
                             {
-                                myCustomPlaylists.map(list =>
+                                playlists.map(list =>
                                     <option key={"list-"+list._id} value={list._id}>
                                         {list.title}
                                     </option>
@@ -100,13 +126,16 @@ const Music = (props) => {
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={() => setModalActive(false)}>Close</Button>
-                <Button variant="primary" onClick={addSongHandle}>Add</Button>
+                <Button variant="secondary" onClick={onHide}>Close</Button>
+                <Button variant="primary" onClick={addSongHandler}>Add</Button>
             </Modal.Footer>
         </Modal>
-        </>
     )
-}
+}, (prev, nextState) => {
+    return prev.show === nextState.show &&
+    prev.playlists === nextState.playlists &&
+    prev.selectedPlaylistId === nextState.selectedPlaylistId
+})
 
 const mapStateToProps = state => ({
     playerState: state.player,
@@ -119,9 +148,9 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     pause: () => dispatch(pause()),
     play: songId => dispatch(play(songId)),
-    addSongToPlaylist: (playlistId, song) => dispatch(addSongToPlaylistStart(playlistId, song)),
-    likeSong: (userId, song) => dispatch(likeSong(userId, song)),
-    unlikeSong: (userId, song) => dispatch(unlikeSong(userId, song)),
+    addSongToPlaylist: (user, playlistId, song) => dispatch(addSongToPlaylist(user, playlistId, song)),
+    likeSong: (user, song) => dispatch(likeSong(user, song)),
+    unlikeSong: (user, song) => dispatch(unlikeSong(user, song)),
     
 })
 export default connect(mapStateToProps, mapDispatchToProps)(Music)

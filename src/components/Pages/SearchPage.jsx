@@ -6,12 +6,12 @@ import {searchMusic } from '../../redux/MusicReducer'
 import Music from '../../components/Music/Music'
 import { Alert } from 'react-bootstrap'
 
-const SearchPage = ({searchedMusic, searchMusic}) => {
+const SearchPage = ({user, searchedMusic, searchMusic}) => {
 
     const {value} = useParams()
 
     useEffect(() => {
-        searchMusic(value)
+        searchMusic(user, value)
     }, [value])
 
     return (
@@ -23,10 +23,11 @@ const SearchPage = ({searchedMusic, searchMusic}) => {
 
 const mapStateToProps = state => ({
     searchedMusic: state.music.search.list,
+    user: state.auth.user
 })
 
 const mapDispatchToProps = dispatch => ({
-    searchMusic: (songName) => dispatch(searchMusic(songName)),
+    searchMusic: (user, songName) => dispatch(searchMusic(user, songName)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(SearchPage)

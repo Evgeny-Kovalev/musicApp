@@ -8,7 +8,6 @@ const
 
 const initialState = {
     user: null,
-    token: null,
     isAuth: false,
     error: false,
     loading: false,
@@ -26,7 +25,6 @@ const AuthReducer = (state = initialState, action) => {
             }
 
         case AUTH_SUCCESS:
-            console.log(action)
             return {
                 ...state,
                 user: {
@@ -34,8 +32,9 @@ const AuthReducer = (state = initialState, action) => {
                     id: action.data.user.id,
                     email: action.data.user.email,
                     name: action.data.user.name,
+                    roles: action.data.user.roles,
+                    token: action.data.token,
                 },
-                token: action.data.token,
                 isAuth: true,
                 loading: false,
                 error: false,
@@ -53,7 +52,6 @@ const AuthReducer = (state = initialState, action) => {
             return {
                 ...state,
                 user: null,
-                token: null,
                 isAuth: false,
             }
 
@@ -65,6 +63,7 @@ const AuthReducer = (state = initialState, action) => {
 export const authStart = () => ({ type: AUTH_START })
 export const authSuccess = (data) => ({ type: AUTH_SUCCESS, data })
 export const authFailed = (error) => ({ type: AUTH_FAILED, error})
+
 export const logout = () => {
     localStorage.removeItem('user')
     localStorage.removeItem('token')
@@ -84,8 +83,8 @@ export const login = (email, password) => async dispatch => {
         dispatch(authSuccess(data))
     }
     catch(err) {
-        dispatch(authFailed(err))
-        console.log(err)
+        console.log(err.message)
+        dispatch(authFailed(err.message))
     }
 }
 
@@ -105,10 +104,24 @@ export const signup = (email, password, name) => async dispatch => {
     }
 }
 
-export const getAuthUserData = () => dispatch => {
+export const setAuthUserData = () => async dispatch => {
     const token = localStorage.getItem('token')
-    const user = localStorage.getItem('user')
-    if (token && user) dispatch(authSuccess({ user: JSON.parse(user), token }))
+    let user = localStorage.getItem('user')
+    try {
+        if (token && user) {
+            const [res, data] = await authAPI.authMe(token)
+            if (res.status !== 200) throw Error(data.message)
+            dispatch(authSuccess({user: JSON.parse(user), token}))
+        }
+        else {
+            throw Error("Login error")
+        }
+    }
+    catch(err) {
+        dispatch(logout())
+    }
+    
+    
 }
 
 export default AuthReducer

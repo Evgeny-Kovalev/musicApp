@@ -11,9 +11,9 @@ import Title from '../Title/Title'
 const MainPage = ({myMusic, myPlaylists, initMyMusic, initMyPlaylists, myPlaylistsError, myMusicError, initLikedMusic, isAuth, user}) => {
     useEffect(() => {
         if (user?.id) {
-            initLikedMusic(user.id)
-            initMyPlaylists(user.id)
-            initMyMusic(user.id)
+            initLikedMusic(user)
+            initMyPlaylists(user)
+            initMyMusic(user)
         }
     }, [])
     
@@ -57,9 +57,9 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-    initLikedMusic: (userId) => dispatch(initLikedMusic(userId)),
-    initMyMusic: (userId) => dispatch(initMyMusic(userId)),
-    initMyPlaylists: (userId) => dispatch(initMyPlaylists(userId)),
+    initLikedMusic: (user) => dispatch(initLikedMusic(user)),
+    initMyMusic: (user) => dispatch(initMyMusic(user)),
+    initMyPlaylists: (user) => dispatch(initMyPlaylists(user)),
 })
 
 

@@ -1,3 +1,5 @@
+import { musicAPI } from "../components/api/api"
+
 const 
     FETCH_SONG_COMMENTS_START = 'FETCH_SONG_COMMENTS_START',
     FETCH_SONG_COMMENTS_SUCCESS = 'FETCH_SONG_COMMENTS_SUCCESS',
@@ -66,8 +68,7 @@ export const addCommentSuccess = (comment) => ({type: ADD_COMMENT_SUCCESS, comme
 export const initSongComments = (songId) => async dispatch => {
     dispatch(fetchSongCommentsStart())
     try {
-        const res = await fetch(`http://localhost:3001/api/music/${songId}/comments`)
-        const data = await res.json()
+        const [res, data] = await musicAPI.getSongCommentsById(songId)
         if (res.status !== 200) throw Error(data.message)
         dispatch(fetchSongCommentsSuccess(data))
     }
@@ -76,16 +77,9 @@ export const initSongComments = (songId) => async dispatch => {
     }
 }
 
-export const addSongComment = (userId, songId, comment) => async dispatch => {
+export const addSongComment = (user, songId, comment) => async dispatch => {
     try {
-        const res = await fetch(`http://localhost:3001/api/music/${songId}/comments`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json' 
-            },
-            body: JSON.stringify({ userId, text: comment })
-        })
-        const data = await res.json()
+        const [res, data] = await musicAPI.addCommentToSongById(user, songId, comment)
         if (res.status !== 200) throw Error(data.message)
         dispatch(addCommentSuccess(data))
     }

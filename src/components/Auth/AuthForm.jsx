@@ -37,7 +37,7 @@ const AuthForm = ({signup, login, isAuth, error, loading}) => {
                         <Form.Group className="mb-3">
                             <Form.Label>Email address</Form.Label>
                             <Form.Control
-                                type="text" //FIX
+                                type="email"
                                 placeholder="Enter email" 
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}

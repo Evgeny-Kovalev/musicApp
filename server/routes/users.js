@@ -3,18 +3,19 @@ const express = require('express')
 const router = express.Router()
 
 const usersController = require('../controllers/users')
+const roleMiddleware = require('../middleware/roleMiddleware')
 
-// router.get("/", musicController.getUsers)
-// router.get("/:userId", musicController.getUser)
+router.get("/", roleMiddleware(["ADMIN"]), usersController.getUsers)
+// router.get("/:userId", usersController.getUser)
 
-router.get("/:userId/music", usersController.getUserMusic)
-router.get("/:userId/music/liked", usersController.getUserLikedMusic)
-router.put("/:userId/music/:songId", usersController.putAddUserMusic)
-router.delete("/:userId/music/:songId", usersController.deleteUserMusic)
+router.get("/music", usersController.getUserMusic)
+router.get("/music/liked", usersController.getUserLikedMusic)
+router.put("/music/:songId", usersController.putAddUserMusic)
+router.delete("/music/:songId", usersController.deleteUserMusic)
 
-router.get("/:userId/playlists", usersController.getUserPlaylists)
-router.post("/:userId/playlists", usersController.postCreateNewUserPlaylist)
-router.put("/:userId/playlists/:playlistId", usersController.putAddUserPlaylist)
-router.delete("/:userId/playlists/:playlistId", usersController.deleteUserPlaylist)
+router.get("/playlists", usersController.getUserPlaylists)
+router.post("/playlists", usersController.postCreateNewUserPlaylist)
+router.put("/playlists/:playlistId", usersController.putAddUserPlaylist)
+router.delete("/playlists/:playlistId", usersController.deleteUserPlaylist)
 
 module.exports = router

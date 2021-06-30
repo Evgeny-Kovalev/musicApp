@@ -1,18 +1,19 @@
 const User = require('../models/user')
 const Song = require('../models/song')
+const Role = require('../models/role')
 const Playlist = require('../models/playlist')
 
 // exports.getUser = (req, res, next) => {
     
 // }
 
-// exports.getUsers = (req, res, next) => {
-    
-// }
-
+exports.getUsers = async (req, res, next) => {
+    const users = await User.find().select('_id name email img roles')
+    return res.status(200).json(users)
+}
 
 exports.getUserMusic = async (req, res, next) => {
-    const {userId} = req.params
+    const {userId} = req.user
     const user = await User
         .findById(userId)
         .populate('music.songId', '-comments')
@@ -23,7 +24,7 @@ exports.getUserMusic = async (req, res, next) => {
 }
 
 exports.getUserLikedMusic = async (req, res, next) => {
-    const {userId} = req.params
+    const {userId} = req.user
     const user = await User
         .findById(userId)
         .populate('liked', '-comments')
@@ -33,8 +34,9 @@ exports.getUserLikedMusic = async (req, res, next) => {
 }
 
 exports.putAddUserMusic = async (req, res, next) => {
-    const {userId, songId} = req.params
-    
+    const {songId} = req.params
+    const {userId} = req.user
+
     const song = await Song.findOne({_id: songId})
     if (!song) return res.status(404).json({message: "Song not found"})
     
@@ -50,7 +52,8 @@ exports.putAddUserMusic = async (req, res, next) => {
 }
 
 exports.deleteUserMusic = async (req, res, next) => {
-    const {userId, songId} = req.params
+    const {songId} = req.params
+    const {userId} = req.user
     
     const user = await User.findById(userId).populate('songId')
     if (!user) return res.status(404).json({message: "User not found"})
@@ -64,9 +67,8 @@ exports.deleteUserMusic = async (req, res, next) => {
 
 
 
-
 exports.getUserPlaylists = async (req, res, next) => {
-    const {userId} = req.params
+    const {userId} = req.user
 
     const user = await User
         .findById(userId)
@@ -82,7 +84,8 @@ exports.getUserPlaylists = async (req, res, next) => {
 }
 
 exports.putAddUserPlaylist = async (req, res, next) => {
-    const {userId, playlistId} = req.params
+    const {playlistId} = req.params
+    const {userId} = req.user
 
     const playlist = await Playlist.findOne({_id: playlistId})
     if (!playlist) return res.status(404).json({message: "Playlist not found"})
@@ -99,11 +102,11 @@ exports.putAddUserPlaylist = async (req, res, next) => {
 }
 
 exports.deleteUserPlaylist = async (req, res, next) => {
-    const {userId, playlistId} = req.params
+    const {playlistId} = req.params
+    const {userId} = req.user
     
     const user = await User.findById(userId).populate('songId')
     if (!user) return res.status(404).json({message: "User not found"})
-    
     
     user.playlists = user.playlists.filter(list => list.playlistId.toString() !== playlistId.toString())
     await user.save()
@@ -112,15 +115,17 @@ exports.deleteUserPlaylist = async (req, res, next) => {
 }
 
 exports.postCreateNewUserPlaylist = async (req, res, next) => {
-    const {userId} = req.params
-    let {title, img} = req.body  
-    
+    const {userId} = req.user
+    const {title} = req.body  
+    const img = req.files.img[0].path
+    const baseUrl = 'http://localhost:3001/'
+
     const user = await User.findById(userId)
     if (!user) return res.status(404).json({message: "User not found"})
     
     const playlist = new Playlist({
         title: title,
-        img: img,
+        img: baseUrl + img,
         custom: true
     })
 

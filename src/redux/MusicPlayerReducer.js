@@ -1,10 +1,12 @@
+import { addPlayToSong } from "./MusicReducer"
+
 const DEFAULT_VOLUME = 0.15
 
 const PLAY = 'PLAY', PAUSE = 'PAUSE', SET_CURRENT_TIME = 'SET_CURRENT_TIME',
     SET_DURATION = 'SET_DURATION', SET_VOLUME= 'SET_VOLUME'
 
 const initialState = {
-    currentSongId: '',
+    // currentSongId: '',
     currentSong: null,
     currentTime: 0,
     duration: 0,
@@ -22,7 +24,7 @@ const MusicPlayerReducer = (state = initialState, action) => {
                 ...state,
                 playing: true,
                 currentSong: action.song || state.currentSong,
-                currentSongId: action.song?._id || state.currentSongId
+                // currentSongId: action.song?._id || state.currentSongId
             }
         case PAUSE:
             return { ...state, playing: false }
@@ -45,13 +47,26 @@ const MusicPlayerReducer = (state = initialState, action) => {
     }
 }
 
-export const play = (song) => {
+let timeout = null
+
+export const play = (song) => dispatch => {
     console.log('PLAY', song)
-    return { type: PLAY, song}
+    let playsCount = localStorage.getItem('playsCount')
+    
+    timeout && clearTimeout(timeout)
+    timeout = setTimeout(() => {
+        playsCount = playsCount ? ++playsCount : 1
+        localStorage.setItem('playsCount', playsCount)
+        dispatch(addPlayToSong(song))
+    }, 3_000);
+
+    dispatch({ type: PLAY, song })
 }
 
 export const pause = () => {
     console.log('pause')
+    clearTimeout(timeout)
+    timeout = null
     return { type: PAUSE}
 }
 
