@@ -6,9 +6,9 @@ import './App.scss';
 
 import AdminPages from './components/Pages/AdminPages';
 import ClientPages from './components/Pages/ClientPages';
-
 import { initializeApp } from './redux/AppReducer';
 import { Spinner } from 'react-bootstrap';
+import Toasts from './components/Toasts/Toasts';
 
 
 export const StoreContext = createContext(null)
@@ -33,7 +33,7 @@ function App({initialized, initializeApp}) {
 
 			</Switch>
 
-			
+			<Toasts />
 		</div>
 	)
 }

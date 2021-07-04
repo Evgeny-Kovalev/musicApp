@@ -1,4 +1,5 @@
 import { musicAPI, usersAPI } from "../components/api/api"
+import {addToastError, addToastSuccess} from "./ToastsReducer";
 
 const 
     FETCH_MY_MUSIC_START = 'FETCH_MY_MUSIC_START',
@@ -300,8 +301,10 @@ export const addSongToMyMusic = (user, song) => async dispatch => {
         const [res, data] = await usersAPI.addSongToUserMusic(user, song)
         if (res.status !== 200) throw Error(data.message)
         dispatch(addSongToMyMusicSuccess(song))
+        dispatch(addToastSuccess({ text: 'Song added successfully' }))
     }
     catch(err) {
+        dispatch(addToastError({ text: 'Failed to add song' }))
         console.log(err)
     }
 }
@@ -312,8 +315,10 @@ export const removeSongFromMyMusic = (user, song) => async dispatch => {
         const [res, data] = await usersAPI.removeSongFromUserMusic(user, song)
         if (res.status !== 200) throw Error(data.message)
         dispatch(removeFromMyMusicSuccess(song))
+        dispatch(addToastSuccess({ text: 'Song removed successfully' }))
     }
     catch(err) {
+        dispatch(addToastError({ text: 'Failed to remove the song' }))
         console.log(err)
     }
 }

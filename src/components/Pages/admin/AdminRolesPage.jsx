@@ -11,7 +11,7 @@ const AdminRolesPage = ({roles, users, authUser, getRoles, getUsers, error, load
             getUsers(authUser)
         }  
     }, [])
-    
+
     const [modalShow, setModalShow] = useState(false);
     const [currentRole, setCurrentRole] = useState(roles[0])
     
@@ -24,7 +24,8 @@ const AdminRolesPage = ({roles, users, authUser, getRoles, getUsers, error, load
     }
 
     const removeRoleFromUserHandler = (role, user) => {
-        removeRoleFromUser(authUser, role, user)
+        const conf = window.confirm(`Are you sure?`)
+        conf && removeRoleFromUser(authUser, role, user)
     }
 
     const addRoleToUserHandler = (role, user) => {

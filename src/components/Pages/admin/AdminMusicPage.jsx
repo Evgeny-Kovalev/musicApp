@@ -34,7 +34,8 @@ const AdminMusicPage = ({user, music, getMusic, addNewMusic, removeSong}) => {
 
     
     const onRemoveSongHandler = (song) => {
-        removeSong(user, song)
+        const conf = window.confirm(`Are you sure?`)
+        conf && removeSong(user, song)
     }
     
     const dataToShow = {

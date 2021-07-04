@@ -1,4 +1,5 @@
 import { usersAPI, playlistAPI } from "../components/api/api"
+import {addToastError, addToastSuccess} from "./ToastsReducer";
 
 const 
     FETCH_MY_PLAYLISTS_START = 'FETCH_MY_PLAYLISTS_START',
@@ -241,11 +242,14 @@ export const initPlaylist = (playlistId) => async dispatch => {
 
 export const createNewMyPlaylistStart = (user, playlist) => async dispatch => {
     try {
+        console.log(playlist)
         const [res, data] = await usersAPI.createNewUserPlaylist(user, playlist)
         if (res.status !== 200) throw new Error(data.message)
         dispatch(createNewPlaylistSuccess(data))
+        dispatch(addToastSuccess({ text: `Playlist created successfully` }))
     }
     catch(err) {
+        dispatch(addToastError({ text: 'Failed to create playlist' }))
         console.error(err);
     }
 }
@@ -255,9 +259,11 @@ export const addSongToPlaylist = (user, playlistId, song) => async dispatch => {
         const [res, data] = await usersAPI.addSongToPlaylist(user, playlistId, song)
         if (res.status !== 200) throw new Error(data.message)
         dispatch(addSongToPlaylistSuccess(playlistId, song))
+        dispatch(addToastSuccess({ text: 'Song added successfully' }))
 
     }
     catch(err) {
+        dispatch(addToastError({ text: 'Failed to add song to playlist' }))
         console.error(err)
     }
 }
@@ -267,8 +273,10 @@ export const removeSongFromPlaylist = (user, playlistId, song) => async dispatch
         const [res, data] = await usersAPI.removeSongFromPlaylist(user, playlistId, song)
         if (res.status !== 200) throw new Error(data.message)
         dispatch(removeSongFromPlaylistSuccess(playlistId, song))
+        dispatch(addToastSuccess({ text: 'Song removed successfully' }))
     }
     catch(err) {
+        dispatch(addToastError({ text: 'Failed to remove song from playlist' }))
         console.error(err)
     }
 }
@@ -279,8 +287,10 @@ export const removeFromMyPlaylists = (user, playlist) => async dispatch => {
         const [res, data] = await usersAPI.removePlaylistFromMy(user, playlist)
         if (res.status !== 200) throw new Error(data.message)
         dispatch(deletePlaylistSuccess(playlist))
+        dispatch(addToastSuccess({ text: 'Playlist removed successfully' }))
     }
     catch(err) {
+        dispatch(addToastError({ text: 'Failed to remove playlist' }))
         console.error(err);
     }
 }
@@ -291,8 +301,10 @@ export const addToMyPlaylists = (user, playlist) => async dispatch => {
         const [res, data] = await usersAPI.addPlaylistToMy(user, playlist)
         if (res.status !== 200) throw new Error(data.message)
         dispatch(addPlaylistSuccess(playlist))
+        dispatch(addToastSuccess({ text: 'Playlist added successfully' }))
     }
     catch(err) {
+        dispatch(addToastError({ text: 'Failed to add playlist' }))
         console.error(err)
     }
 }
@@ -302,8 +314,10 @@ export const editMyPlaylist = (user, playlist, newData) => async dispatch => {
         const [res, data] = await playlistAPI.editMyPlaylist(user, playlist, newData)
         if (res.status !== 200) throw new Error(data.message)
         dispatch({ type: EDIT_PLAYLIST_SUCCESS, playlist, newData })
+        dispatch(addToastSuccess({ text: 'Playlist edit successfully' }))
     }
     catch(err) {
+        dispatch(addToastError({ text: 'Failed to edit playlist' }))
         console.error(err)
     }
 }

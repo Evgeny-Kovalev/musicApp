@@ -7,6 +7,7 @@ import PlaylistsReducer from "./PlaylistsReducer";
 import CommentsReducer from "./CommentsReducer";
 import MusicReducer from "./MusicReducer";
 import AdminReducer from "./AdminReducer";
+import ToastsReducer from "./ToastsReducer";
 
 const reducers = combineReducers({
     playlists: PlaylistsReducer,
@@ -16,6 +17,7 @@ const reducers = combineReducers({
     comments: CommentsReducer,
     app: AppReducer,  
     admin: AdminReducer,  
+    toasts: ToastsReducer,  
 })
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

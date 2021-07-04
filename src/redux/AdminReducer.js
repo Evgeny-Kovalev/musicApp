@@ -1,4 +1,5 @@
 import { musicAPI, rolesAPI, usersAPI } from "../components/api/api"
+import {addToastError, addToastSuccess} from "./ToastsReducer";
 
 const 
     ADD_NEW_MUSIC_SUCCESS = 'ADD_NEW_MUSIC_SUCCESS',
@@ -146,22 +147,24 @@ export const addNewMusic = (user, formData) => async dispatch => {
         const [res, data] = await musicAPI.addNewMusic(user, formData)
         if (res.status !== 200) throw Error(data.message)
         dispatch(addNewMusicSuccess(data))
+        dispatch(addToastSuccess({ text: 'Song added successfully' }))
     }
     catch(err) {
         console.log(err)
+        dispatch(addToastError({ text: 'Failed to add song' }))
         // dispatch(setError(err))
     }
 }
 export const removeSong = (user, song) => async dispatch => {
     try {
-        // dispatch(setLoading())
         const [res, data] = await musicAPI.removeSong(user, song)
         if (res.status !== 200) throw Error(data.message)
         dispatch(removeSongSuccess(song))
+        dispatch(addToastSuccess({ text: 'Song removed successfully' }))
     }
     catch(err) {
         console.log(err)
-        // dispatch(setError(err))
+        dispatch(addToastError({ text: 'Failed to remove the song' }))
     }
 }
 
@@ -184,8 +187,10 @@ export const removeRoleFromUser = (authUser, role, user) => async dispatch => {
         const [res, data] = await rolesAPI.removeRoleFromUser(authUser, role, user)
         if (res.status !== 200) throw new Error(data.message)
         dispatch({type: REMOVE_ROLE_FROM_USER_SUCCESS, role, user})
+        dispatch(addToastSuccess({ text: `Role ${role.value} removed from user ${user.name}`}))
     }
     catch(err) {
+        dispatch(addToastError({ text: 'Remove role failed' }))
         console.log(err)
     }
 }
@@ -195,8 +200,10 @@ export const addRoleToUser = (authUser, role, user) => async dispatch => {
         const [res, data] = await rolesAPI.addRoleToUser(authUser, role, user)
         if (res.status !== 200) throw new Error(data.message)
         dispatch({type: ADD_ROLE_TO_USER_SUCCESS, role, user})
+        dispatch(addToastSuccess({ text: `Role ${role.value} add to user ${user.name}`}))
     }
     catch(err) {
+        dispatch(addToastError({ text: 'Role could not be added' }))
         console.log(err)
     }
 }

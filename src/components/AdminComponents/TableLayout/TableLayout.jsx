@@ -14,7 +14,7 @@ const TableLayout = ({content, onRemove, onEdit, onDetails, data}) => {
             </thead>
             <tbody>
                 {
-                    content.map(item =>
+                    content && content.map(item =>
                         <tr key={item._id}>
                             {
                                 Object.keys(data).map(key => {
