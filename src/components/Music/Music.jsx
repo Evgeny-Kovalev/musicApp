@@ -41,7 +41,7 @@ const Music = React.memo(props => {
         }
     }
     const likeSongHandler = (isLike, song) => {
-        if (user?.id) {
+        if (user?._id) {
             isLike 
             ? likeSong(user, song)
             : unlikeSong(user, song)

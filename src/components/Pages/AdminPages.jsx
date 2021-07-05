@@ -9,6 +9,8 @@ import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { Alert } from 'react-bootstrap'
 import AdminRolesPage from './admin/AdminRolesPage'
+import EditSongPage from './admin/EditSongPage'
+import EditUserPage from './admin/EditUserPage'
 
 const AdminPages = ({user, isAuth}) => {
 
@@ -55,8 +57,14 @@ const AdminPages = ({user, isAuth}) => {
             <Header />
             <div className="content">
                 <Switch>
-                    <Route path="/admin/music" >
+                    <Route exact path="/admin/music" >
                         <AdminMusicPage />
+                    </Route>
+                    <Route path="/admin/music/edit/:songId" >
+                        <EditSongPage />
+                    </Route>
+                    <Route path="/admin/users/edit/:userId" >
+                        <EditUserPage />
                     </Route>
                     <Route path="/admin/roles" >
                         <AdminRolesPage content={1} />

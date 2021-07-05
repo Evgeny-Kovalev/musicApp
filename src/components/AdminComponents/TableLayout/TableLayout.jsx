@@ -1,5 +1,6 @@
 import React from 'react'
 import { Table } from 'react-bootstrap'
+import { NavLink } from 'react-router-dom'
 import './TableLayout.scss'
 
 const TableLayout = ({content, onRemove, onEdit, onDetails, data}) => {
@@ -32,13 +33,13 @@ const TableLayout = ({content, onRemove, onEdit, onDetails, data}) => {
                             }
                             <td>
                                 <ul className="list-inline m-0">
-                                    {/* <li className="list-inline-item">
-                                        <i className="fas fa-eye"></i>
-                                    </li> */}
-                                    <li className="list-inline-item">
-                                        <i className="fas fa-edit"></i>
-                                    </li>
-                                    <li className="list-inline-item" onClick={() => onRemove(item)}>
+                                    {
+                                        onEdit &&
+                                        <li className="list-inline-item" onClick={() => onEdit(item)} >
+                                            <i className="fas fa-edit"></i>
+                                        </li>
+                                    }
+                                    <li className="list-inline-item" onClick={() => onRemove(item)} >
                                         <i className="fas fa-minus-circle"></i>
                                     </li>
                                 </ul>

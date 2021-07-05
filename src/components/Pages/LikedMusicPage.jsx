@@ -10,7 +10,7 @@ import Title from '../Title/Title'
 const LikedMusicPage = ({likedMusic, initLikedMusic, musicError, user}) => {
 
     useEffect(() => {
-        user?.id && initLikedMusic(user)
+        user?._id && initLikedMusic(user)
     }, [initLikedMusic])
 
     let myLikedMusic = musicError ? <Alert variant="danger" >Music can't be loaded!</Alert>

@@ -13,6 +13,51 @@ export const usersAPI = {
         return [res, data]
     },
 
+    async getUserById(authUser, userId) {
+        const res = await fetch(baseUrl + `/user/${userId}`, {
+            headers: {
+                'Authorization': 'Bearer ' + authUser.token
+            }
+        })
+        const data = await res.json()
+        return [res, data]
+    },
+
+    async updateUser(authUser, user, formData) {
+        const res = await fetch(baseUrl + `/user/${user._id}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + authUser.token
+            },
+            body: formData,
+        })
+        const data = await res.json()
+        return [res, data]
+    },
+    
+    async addNewUser(authUser, formData) {
+        const res = await fetch(baseUrl + '/user', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + authUser.token
+            },
+            body: formData,
+        })
+        const data = await res.json()
+        return [res, data]
+    },
+
+    async removeUser(authUser, user) {
+        const res = await fetch(baseUrl + '/user/' + user._id, {
+            method: 'DELETE',
+            headers: {
+                Authorization: "Bearer " + authUser.token
+            }
+        })
+        const data = await res.json()
+        return [res, data]
+    },
+    
     async getUserMusic(user) {
         const res = await fetch(baseUrl + '/user/music/', {
             headers: {
@@ -177,6 +222,18 @@ export const musicAPI = {
             headers: {
                 'Content-Type': 'application/json',
             }
+        })
+        const data = await res.json()
+        return [res, data]
+    },
+
+    async updateSong(user, song, formData) {
+        const res = await fetch(baseUrl + `/music/${song._id}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + user.token
+            },
+            body: formData,
         })
         const data = await res.json()
         return [res, data]

@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const User = require('../models/user')
+const Playlist = require('../models/playlist')
 
 const songSchema = new mongoose.Schema({
     title: {
@@ -32,5 +34,20 @@ const songSchema = new mongoose.Schema({
         }
     ],
 }) 
+
+songSchema.post('findOneAndRemove', async document => {
+    await User.updateMany(
+        {},
+        {
+            $pull: {
+                'music': { songId: document._id }
+            }
+        }
+    )
+    await Playlist.updateMany(
+        {},
+        { $pull: { music: document._id } }
+    )
+})
 
 module.exports = mongoose.model('Song', songSchema)

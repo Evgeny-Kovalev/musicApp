@@ -2,10 +2,71 @@ const User = require('../models/user')
 const Song = require('../models/song')
 const Role = require('../models/role')
 const Playlist = require('../models/playlist')
+const bcrypt = require('bcryptjs')
 
-// exports.getUser = (req, res, next) => {
+exports.deleteUser = async (req, res, next) => {
+    const {userId} = req.params
     
-// }
+    const user = await User.findByIdAndRemove(userId)
+    if (!user) return res.status(404).json({message: "User not found"})
+
+    return res.status(200).json({message: 'User deleted'})
+}
+
+exports.getUser = async (req, res, next) => {
+    const {userId} = req.params
+    
+    const user = await User.findById(userId)
+    if (!user) return res.status(404).json({message: "User not found"})
+    return res.status(200).json(user)
+}
+
+exports.putEditUser = async (req, res, next) => {
+    try {
+        const { userId } = req.params
+        const { name, email } = req.body
+        const baseUrl = process.env.BASE_URL
+
+        const newUserData = { name, email } 
+        const imgUrl = req.files.img && req.files.img[0].path
+        if (imgUrl) newUserData.img = baseUrl + imgUrl
+
+        const user = await User.findByIdAndUpdate(userId, newUserData, { new: true })
+        res.status(200).json({message: 'User updated successfully', user})
+    }
+    catch(err) {
+        res.status(400).json({message: "Error"})
+    }
+}
+
+exports.postAddUser = async (req, res, next) => {
+    const {name, email, password} = req.body  
+    const img = req.files?.img && req.files?.img[0].path
+
+    const baseUrl = process.env.BASE_URL
+
+    const user = await User.findOne({email})
+    if (user) return res.status(400).json({message: "User already exists"})
+    
+    const hashedPassword = await bcrypt.hash(password, 12)
+    const userRole = await Role.findOne({value: "USER"})
+
+    const newUser = new User({
+        name,
+        email,
+        img: img && (baseUrl + img),
+        password: hashedPassword,
+        roles: [userRole.value]
+    })
+    await newUser.save()
+    userRole.users.push(newUser)
+    userRole.save()
+
+    return res.status(200).json({
+        message: "User created",
+        user: {_id: newUser._id, name: newUser.name, email: newUser.email, roles: newUser.roles, img: newUser.img},
+    })
+}
 
 exports.getUsers = async (req, res, next) => {
     const users = await User.find().select('_id name email img roles')
@@ -117,7 +178,7 @@ exports.deleteUserPlaylist = async (req, res, next) => {
 exports.postCreateNewUserPlaylist = async (req, res, next) => {
     const {userId} = req.user
     const {title} = req.body  
-    const img = req.files.img[0].path
+    const img = req.files?.img && req.files.img[0].path
     const baseUrl = 'http://localhost:3001/'
 
     const user = await User.findById(userId)
@@ -125,7 +186,7 @@ exports.postCreateNewUserPlaylist = async (req, res, next) => {
     
     const playlist = new Playlist({
         title: title,
-        img: baseUrl + img,
+        img: img && (baseUrl + img),
         custom: true
     })
 

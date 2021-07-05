@@ -27,12 +27,12 @@ const initialState = {
         loading: false,
     },
     my: {
-        list: null,
+        list: [],
         error: false,
         loading: false,
     },
     popular: {
-        list: null,
+        list: [],
         error: false,
         loading: false,
     },

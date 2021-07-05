@@ -18,7 +18,7 @@ exports.getMusic = async (req, res, next) => {
 }
 
 exports.postAddSong = async (req, res, next) => {
-    const baseUrl = 'http://localhost:3001/'
+    const baseUrl = process.env.BASE_URL
     const { title, artist } = req.body
     const songUrl = req.files.song[0].path
     const imgUrl = req.files.img[0].path
@@ -32,9 +32,14 @@ exports.postAddSong = async (req, res, next) => {
 exports.putEditSong = async (req, res, next) => {
     try {
         const { id } = req.params
-        const { songData } = req.body
+        const { title, artist } = req.body
+        const baseUrl = process.env.BASE_URL
 
-        const song = await Song.findByIdAndUpdate(id, songData)
+        const newSongData = { title, artist } 
+        const imgUrl = req.files.img && req.files.img[0].path
+        if (imgUrl) newSongData.img = baseUrl + imgUrl
+
+        const song = await Song.findByIdAndUpdate(id, newSongData, { new: true })
         res.status(200).json({message: 'Song updated successfully', song})
     }
     catch(err) {

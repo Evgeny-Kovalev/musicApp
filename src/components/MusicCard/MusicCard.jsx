@@ -42,7 +42,7 @@ const MusicCard = ({content, isPlaylist = false, deleteFromMyPlaylists, deleteFr
     const dropdown = (
         <DropdownButton id="dropdown-basic-button" title="Actions" className="mr-2">
         {
-            isPlaylist && isMy && creator === user?.id && !isEditMode &&
+            isPlaylist && isMy && creator === user?._id && !isEditMode &&
             <Dropdown.Item onClick={() => setIsEditMode(true)}>Edit</Dropdown.Item>
         }
         {

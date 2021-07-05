@@ -15,7 +15,7 @@ const SongPage = ({currentSong, initSong, isAuth, initSongComments, initMyMusic,
     const {songId} = useParams()
 
     useEffect(() => {
-        user?.id && initMyMusic(user)
+        user?._id && initMyMusic(user)
         if (songId) {
             initSong(songId)
             initSongComments(songId)
@@ -25,18 +25,18 @@ const SongPage = ({currentSong, initSong, isAuth, initSongComments, initMyMusic,
     const isMySong = myMusic && myMusic.some(mySong => mySong._id.toString() === songId.toString())
 
     const deleteSongHandle = (song) => {
-        if (user?.id) {
+        if (user?._id) {
             removeSongFromMyMusic(user, song)
         }
     }
     const addToMyMusicHandle = (song) => {
-        if (user?.id) {
+        if (user?._id) {
             addSongToMyMusic(user, song)
         }
     }
 
     const commentSubmitHandler = comment => {
-        if (user?.id) {
+        if (user?._id) {
             addSongComment(user, songId, comment)
         }
     }

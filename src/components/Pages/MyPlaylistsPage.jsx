@@ -10,10 +10,10 @@ import Title from '../Title/Title'
 const MyPlaylistsPage = ({myPlaylists, myPlaylistsError, playlistsLoading, initMyPlaylists, user}) => {
 
     useEffect(() => {
-        if (user?.id) {
+        if (user?._id) {
             initMyPlaylists(user)
         }
-    }, [user.id, initMyPlaylists])
+    }, [user._id, initMyPlaylists])
 
     let playlists = myPlaylistsError 
     ? <Alert variant="danger" >Music can't be loaded!</Alert>

@@ -29,7 +29,7 @@ const AuthReducer = (state = initialState, action) => {
                 ...state,
                 user: {
                     ...state.user,
-                    id: action.data.user.id,
+                    _id: action.data.user._id,
                     email: action.data.user.email,
                     name: action.data.user.name,
                     roles: action.data.user.roles,

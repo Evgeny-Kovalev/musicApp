@@ -16,7 +16,7 @@ const PlaylistPage = (props) => {
     const {playlistId} = useParams()
 
     useEffect(() => {
-        if (user?.id) {
+        if (user?._id) {
             initMyPlaylists(user)
         }
         if (playlistId) {
@@ -25,16 +25,16 @@ const PlaylistPage = (props) => {
     }, [initPlaylist, playlistId])
 
     const removeSongHandle = (song) => {
-        user?.id && removeSongFromPlaylist(user, currentPlaylist._id, song)
+        user?._id && removeSongFromPlaylist(user, currentPlaylist._id, song)
     }
 
     const deletePlaylistHandle = (playlist) => {
-        if (user?.id) {
+        if (user?._id) {
             removeFromMyPlaylists(user, playlist)
         }
     }
     const addToMyPlaylistsHandle = (playlist) => {
-        if (user?.id) {
+        if (user?._id) {
             addToMyPlaylists(user, playlist)
         }
     }

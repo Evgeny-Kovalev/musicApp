@@ -10,7 +10,7 @@ import Title from '../Title/Title'
 
 const MainPage = ({myMusic, myPlaylists, initMyMusic, initMyPlaylists, myPlaylistsError, myMusicError, initLikedMusic, isAuth, user}) => {
     useEffect(() => {
-        if (user?.id) {
+        if (user?._id) {
             initLikedMusic(user)
             initMyPlaylists(user)
             initMyMusic(user)
@@ -48,7 +48,7 @@ const MainPage = ({myMusic, myPlaylists, initMyMusic, initMyPlaylists, myPlaylis
 
 const mapStateToProps = state => ({
     myMusic: state.music.my.list,
-    mymyMusicError: state.music.my.error,
+    myMusicError: state.music.my.error,
     
     myPlaylists: state.playlists.my.list,
     myPlaylistsError: state.playlists.my.error,

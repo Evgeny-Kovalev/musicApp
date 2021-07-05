@@ -34,7 +34,7 @@ exports.putSignup = async (req, res, next) => {
 
         res.status(200).json({
             message: "User created",
-            user: {id: newUser._id, name: newUser.name, email: newUser.email, roles: newUser.roles},
+            user: {_id: newUser._id, name: newUser.name, email: newUser.email, roles: newUser.roles},
             token,
         })
     }
@@ -67,7 +67,7 @@ exports.postLogin = async (req, res, next) => {
         res.status(200).json({
             token,
             user: {
-                id: loadedUser._id,
+                _id: loadedUser._id,
                 name: loadedUser.name,
                 email: loadedUser.email,
                 roles: loadedUser.roles

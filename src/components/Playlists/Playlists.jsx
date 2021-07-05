@@ -12,7 +12,7 @@ const Playlists = ({playlists, createNewMyPlaylist, withAdding, limit, isAuth, u
     const [playlistImg, setPlaylistImg] = useState()
 
     const handleCreateNewPlaylist = () => {
-        if (newPlaylistTitle !== "" && user?.id) {
+        if (newPlaylistTitle !== "" && user?._id) {
             const formData = new FormData()
             formData.append('img', playlistImg)
             formData.append('title', newPlaylistTitle)

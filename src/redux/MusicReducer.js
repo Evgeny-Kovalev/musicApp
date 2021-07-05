@@ -25,22 +25,22 @@ const
     ADD_PLAY_TO_MUSIC_SUCCESS ='ADD_PLAY_TO_MUSIC_SUCCESS'   
 const initialState = {
     search: {
-        list: null,
+        list: [],
         error: false,
         loading: false,
     },
     my: {
-        list: null,
+        list: [],
         error: false,
         loading: false,
     },
     liked: {
-        list: null,
+        list: [],
         error: false,
         loading: false,
     },
     popular: {
-        list: null,
+        list: [],
         error: false,
         loading: false,
     },
@@ -218,6 +218,7 @@ export const initSong = (songId) => async dispatch => {
         const [res, data] = await musicAPI.getSongById(songId)
         if (res.status !== 200) throw Error(data.message)
         dispatch(setCurrentSong(data))
+        return data
     }
     catch(err) {
         console.log(err)

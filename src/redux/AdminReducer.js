@@ -5,6 +5,9 @@ const
     ADD_NEW_MUSIC_SUCCESS = 'ADD_NEW_MUSIC_SUCCESS',
     REMOVE_SONG_SUCCESS = 'REMOVE_SONG_SUCCESS',
 
+    ADD_NEW_USER_SUCCESS = 'ADD_NEW_USER_SUCCESS',
+    REMOVE_USER_SUCCESS = 'REMOVE_USER_SUCCESS',
+
     SET_USERS = 'SET_USERS',
     SET_ROLES = 'SET_ROLES',
     SET_MUSIC = 'SET_MUSIC',
@@ -63,13 +66,25 @@ const AppReducer = (state = initialState, action) => {
         case ADD_NEW_MUSIC_SUCCESS:
             return {
                 ...state,
-                music: [...state.music, action.music]
+                music: [action.music, ...state.music]
             }
         case REMOVE_SONG_SUCCESS:
             return {
                 ...state,
                 music: state.music.filter(song => song._id !== action.song._id)
             }
+
+        case ADD_NEW_USER_SUCCESS:
+            return {
+                ...state,
+                users: [action.user, ...state.users]
+            }
+        case REMOVE_USER_SUCCESS:
+            return {
+                ...state,
+                users: state.users.filter(user => user._id !== action.user._id)
+            }
+
         case ADD_ROLE_TO_USER_SUCCESS: {
             const currentRoleIndex = state.roles.findIndex(role => role._id.toString() === action.role._id.toString())
             const roles = [...state.roles]
@@ -168,6 +183,18 @@ export const removeSong = (user, song) => async dispatch => {
     }
 }
 
+export const updateSong = (user, song, formData) => async dispatch => {
+    try {
+        const [res, data] = await musicAPI.updateSong(user, song, formData)
+        if (res.status !== 200) throw Error(data.message)
+        dispatch(addToastSuccess({ text: "Song updated" }))
+    }
+    catch(err) {
+        dispatch(addToastError({ text: 'Failed to update the song' }))
+        console.log(err)
+    }
+}
+
 export const getRoles = (user) => async dispatch => {
     dispatch(setLoading())
     try {
@@ -207,5 +234,56 @@ export const addRoleToUser = (authUser, role, user) => async dispatch => {
         console.log(err)
     }
 }
+
+export const getUser = (authUser, userId) => async dispatch => {
+    try {
+        const [res, data] = await usersAPI.getUserById(authUser, userId)
+        if (res.status !== 200) throw Error(data.message)
+        return data
+    }
+    catch(err) {
+        dispatch(addToastError({ text: 'Failed to load user' }))
+        console.log(err)
+    }
+}
+
+export const removeUser = (authUser, user) => async dispatch => {
+    try {
+        const [res, data] = await usersAPI.removeUser(authUser, user)
+        if (res.status !== 200) throw new Error(data.message)
+        dispatch({type: REMOVE_USER_SUCCESS, user})
+        dispatch(addToastSuccess({ text: `User '${user.name}' removed successfully`}))
+    }
+    catch(err) {
+        dispatch(addToastError({ text: 'Remove user failed' }))
+        console.log(err)
+    }
+}
+
+export const updateUser = (authUser, user, formData) => async dispatch => {
+    try {
+        const [res, data] = await usersAPI.updateUser(authUser, user, formData)
+        if (res.status !== 200) throw new Error(data.message)
+        dispatch(addToastSuccess({ text: `User updated successfully`}))
+    }
+    catch(err) {
+        dispatch(addToastError({ text: 'Update user failed' }))
+        console.log(err)
+    }
+}
+
+export const addNewUser = (authUser, formData) => async dispatch => {
+    try {
+        const [res, data] = await usersAPI.addNewUser(authUser, formData)
+        if (res.status !== 200) throw new Error(data.message)
+        dispatch({type: ADD_NEW_USER_SUCCESS, user: data.user})
+        dispatch(addToastSuccess({ text: `User '${data.user.name}' added successfully`}))
+    }
+    catch(err) {
+        dispatch(addToastError({ text: 'Add user failed' }))
+        console.log(err)
+    }
+}
+
 
 export default AppReducer

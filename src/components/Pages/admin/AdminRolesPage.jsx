@@ -6,7 +6,7 @@ import { getRoles, getUsers, removeRoleFromUser, addRoleToUser } from '../../../
 
 const AdminRolesPage = ({roles, users, authUser, getRoles, getUsers, error, loading, removeRoleFromUser, addRoleToUser}) => {
     useEffect(() => {
-        if (authUser?.id) {
+        if (authUser?._id) {
             getRoles(authUser)
             getUsers(authUser)
         }  
@@ -76,7 +76,7 @@ const AdminRolesPage = ({roles, users, authUser, getRoles, getUsers, error, load
                                         >
                                             {user.name} - {user.email}
                                             {
-                                                user._id.toString() !== authUser.id.toString() &&
+                                                user._id.toString() !== authUser._id.toString() &&
                                                 <i 
                                                     className="fas fa-times" 
                                                     onClick={() => removeRoleFromUserHandler(role, user)}

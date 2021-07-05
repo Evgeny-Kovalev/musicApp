@@ -3,12 +3,15 @@ import TableLayout from '../../AdminComponents/TableLayout/TableLayout'
 import { connect } from 'react-redux'
 import { addNewMusic, getMusic, removeSong } from '../../../redux/AdminReducer'
 import { Form, Col, Row } from 'react-bootstrap'
+import { useHistory } from 'react-router-dom'
 
 const AdminMusicPage = ({user, music, getMusic, addNewMusic, removeSong}) => {
     
     useEffect(() => {
         getMusic(user)
     }, [])
+
+    const history = useHistory()
 
     const [title, setTitle] = useState("")
     const [artist, setArtist] = useState("")
@@ -33,9 +36,14 @@ const AdminMusicPage = ({user, music, getMusic, addNewMusic, removeSong}) => {
     }
 
     
-    const onRemoveSongHandler = (song) => {
+    const removeSongHandler = (song) => {
         const conf = window.confirm(`Are you sure?`)
         conf && removeSong(user, song)
+    }
+
+    
+    const editSongHandler = (song) => {
+        history.push(`/admin/music/edit/${song._id}`)
     }
     
     const dataToShow = {
@@ -121,7 +129,7 @@ const AdminMusicPage = ({user, music, getMusic, addNewMusic, removeSong}) => {
             </Form>
             <Row className="g-2" >
                 <Col md>
-                    <TableLayout content={music} data={dataToShow} onRemove={onRemoveSongHandler}/>
+                    <TableLayout content={music} data={dataToShow} onRemove={removeSongHandler} onEdit={editSongHandler} />
                 </Col>
             </Row>
         </>
